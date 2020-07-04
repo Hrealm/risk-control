@@ -97,7 +97,6 @@ export default {
         };
     },
     created() {
-        
         this.getCode();
         // let url = 'http://192.168.0.230:9010';
         // this.$store.commit('setUrl', url);
@@ -143,7 +142,9 @@ export default {
             var curTime = new Date().getTime();
             var hs_pwd = AESUTIL(this.param.username + '_' + this.param.password, this.param.username + '|' + curTime);
             let pwd1 = CryptoJS.enc.Utf8.parse(hs_pwd);
-            if (this.param.verification.length == 0) {
+            if (!this.param.username || !this.param.password) {
+                this.open2('账号、密码不能为空');
+            } else if (this.param.verification.length == 0) {
                 this.open2('请输入验证码');
             } else {
                 var bd = {
@@ -174,7 +175,12 @@ export default {
                         if (rid >= 0) {
                             let loginData = JSON.parse(res.data.bd);
                             this.$store.commit('setLoginData', loginData);
+                            var Days = 7;
+                            var exp = new Date();
+                            exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+                            document.cookie = `login=${loginData.si};expires=${exp.toGMTString()}`;
                             this.$router.push('/Dashboard');
+                            // console.log(document.cookie.match(new RegExp("(^| )"+'login'+"=([^;]*)(;|$)"))[2]);
                             // console.log(this.$store.state.loginData);
                         } else {
                             this.open2(res.data.hd.rmsg);

@@ -84,7 +84,7 @@ export default {
                 {
                     icon: 'el-icon-lx-warn',
                     index: 'BreachProcessing',
-                    title: '违约处理'
+                    title: '异常处理'
                 }
             ]
         };

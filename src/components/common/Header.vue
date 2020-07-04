@@ -9,11 +9,11 @@
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->
-                <div class="btn-fullscreen" @click="handleFullScreen">
+                <!-- <div class="btn-fullscreen" @click="handleFullScreen">
                     <el-tooltip effect="dark" :content="fullscreen?`取消全屏`:`全屏`" placement="bottom">
                         <i class="el-icon-rank"></i>
                     </el-tooltip>
-                </div>
+                </div>-->
                 <!-- 消息中心 -->
                 <!-- <div class="btn-bell">
                     <el-tooltip
@@ -26,7 +26,7 @@
                         </router-link>
                     </el-tooltip>
                     <span class="btn-bell-badge" v-if="message"></span>
-                </div> -->
+                </div>-->
                 <!-- 用户头像 -->
                 <div class="user-avator">
                     <img src="../../assets/img/img.jpg" />
@@ -56,7 +56,7 @@ export default {
             message: 2
         };
     },
-    created(){
+    created() {
         this.username = this.$store.state.loginData.name;
     },
     computed: {
@@ -69,7 +69,10 @@ export default {
         // 用户名下拉菜单选择事件
         handleCommand(command) {
             if (command == 'loginout') {
-                localStorage.removeItem('ms_username');
+                localStorage.removeItem('vuex');
+                var exp = new Date();
+                exp.setTime(exp.getTime() - 1);
+                document.cookie = `login=${document.cookie.match(new RegExp("(^| )"+'login'+"=([^;]*)(;|$)"))[2]};expires=${exp.toGMTString()}`;
                 this.$router.push('/login');
             }
         },

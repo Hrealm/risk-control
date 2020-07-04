@@ -5,10 +5,10 @@ Vue.use(vuex);
 export default new vuex.Store({
     state: {
         loginData: {},
-        dispatchTimeout: 0,
-        customTimeout: 0,
-        orderTimeout: 0,
-        waybillTimeout: 0
+        dispatchTimeout: null,
+        customTimeout: null,
+        orderTimeout: null,
+        waybillTimeout: null
     },
     mutations: {
         setLoginData(state, n){

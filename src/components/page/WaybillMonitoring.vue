@@ -9,6 +9,7 @@
                     @change="handleChange"
                     :min="5"
                     :max="10"
+                    :disabled="isMon"
                 ></el-input-number>
             </div>
             <div class="sourceInfo">
@@ -17,9 +18,10 @@
                     v-model="sourceInfoInput"
                     clearable
                     style="width:200px; margin-left:20px; margin-right:20px;"
+                    :disabled="isMon"
                 ></el-input>
                 <span>运单状态</span>
-                <el-select v-model="wbValue" placeholder="全部" style="margin:0 0 0px 20px;">
+                <el-select v-model="wbValue" placeholder="全部" style="margin:0 0 0px 20px;" :disabled="isMon">
                     <el-option
                         v-for="item in options"
                         :key="item.value"
@@ -28,8 +30,8 @@
                     ></el-option>
                 </el-select>
             </div>
-            <el-button type="primary" @click="monBtn">{{monTxt}}</el-button>
-            <el-button type="success" style="width:80px;margin-left:20px;" @click="getData">查 找</el-button>
+            <el-button @click="monBtn" :type="isMon ? 'primary' : ''">{{monTxt}}</el-button>
+            <el-button style="width:80px;margin-left:20px;" :disabled="isMon" @click="getData">查 找</el-button>
         </div>
         <div class="contentData">
             <el-table
@@ -52,7 +54,11 @@
                 <el-table-column prop="on" label="货物名称" width="120"></el-table-column>
                 <el-table-column prop="dw" label="重量(吨)" width="100"></el-table-column>
                 <el-table-column prop="dv" label="体积(方)" width="100"></el-table-column>
-                <el-table-column prop="dis" label="距离(公里)" width="100"></el-table-column>
+                <el-table-column prop="dis" label="距离(公里)" width="100">
+                    <template slot-scope="scope">
+                        <span>{{Math.round(scope.row.dis)}}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="dch" label="服务费(元)" width="100">
                     <template slot-scope="scope">
                         <span style="color:red;">{{scope.row.dch}}</span>
@@ -104,7 +110,7 @@ export default {
                 },
                 {
                     value: '4',
-                    label: '运输中'
+                    label: '待收货'
                 },
                 {
                     value: '6',
@@ -136,7 +142,7 @@ export default {
     created() {
         this.getData();
         let isMoning = this.$store.state.waybillTimeout;
-        if (isMoning != 0) {
+        if (isMoning) {
             this.monTxt = '正在监控';
             this.isMon = true;
             this.interval = isMoning;
@@ -154,7 +160,7 @@ export default {
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
-                st: this.wbValue * 1 || 0,
+                st: this.wbValue * 1 || 9,
                 ocd: '',
                 ss: this.sourceInfoInput,
                 cid: '',
@@ -208,21 +214,19 @@ export default {
         monBtn() {
             this.isMon = !this.isMon;
             if (this.isMon) {
-                this.monTxt = '关闭监控';
+                this.monTxt = '正在监控';
                 this.monitoring();
             } else {
                 this.monTxt = '开启监控';
                 clearInterval(this.interval);
-                this.$store.commit('setWaybillMonitoring', 0);
+                this.$store.commit('setWaybillMonitoring', null);
             }
         },
         monitoring() {
             this.interval = setInterval(() => {
                 this.getData();
-                console.log(1);
-                console.log(this.interval);
-                this.$store.commit('setWaybillMonitoring', this.interval);
             }, this.num * 1000);
+                this.$store.commit('setWaybillMonitoring', this.interval);
         },
         handleCurrentChange(val) {
             this.currentPage = val;

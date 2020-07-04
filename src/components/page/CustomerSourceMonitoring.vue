@@ -9,6 +9,7 @@
                     @change="handleChange"
                     :min="5"
                     :max="10"
+                    :disabled="isMon"
                 ></el-input-number>
             </div>
             <div class="sourceInfo">
@@ -17,10 +18,11 @@
                     v-model="sourceInfoInput"
                     clearable
                     style="width:200px; margin-left:20px;"
+                    :disabled="isMon"
                 ></el-input>
             </div>
-            <el-button type="primary" @click="monBtn">{{monTxt}}</el-button>
-            <el-button type="success" style="width:80px;margin-left:20px;" @click="getData">查 找</el-button>
+            <el-button @click="monBtn" :type="isMon ? 'primary' : '' ">{{monTxt}}</el-button>
+            <el-button style="width:80px;margin-left:20px;" :disabled="isMon" @click="getData">查 找</el-button>
         </div>
         <div class="contentData">
             <el-table
@@ -35,6 +37,7 @@
                 :cell-style="cellBg"
             >
                 <el-table-column type="index" width="50"></el-table-column>
+                <el-table-column prop="ocd" label="订单编号" width="130"></el-table-column>
                 <el-table-column prop="ctm" label="发布时间" width="180"></el-table-column>
                 <el-table-column label="等待时长" width="160">
                     <template slot-scope="scope">
@@ -46,8 +49,12 @@
                 <el-table-column prop="on" label="货物名称" width="150"></el-table-column>
                 <el-table-column prop="dw" label="重量(吨)" width="150"></el-table-column>
                 <el-table-column prop="dv" label="体积(方)" width="150"></el-table-column>
-                <el-table-column prop="dis" label="距离(公里)" width="100"></el-table-column>
-                <el-table-column prop="qyf" label="期望运费" width="100" align="right">
+                <el-table-column prop="dis" label="距离(公里)" width="100">
+                    <template slot-scope="scope">
+                        <span>{{Math.round(scope.row.dis)}}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="qyf" label="期望运费(元)" width="150" align="right">
                     <template slot-scope="scope">
                         <span style="color:red;">{{scope.row.qyf}}</span>
                     </template>
@@ -88,7 +95,7 @@ export default {
         this.getData();
         // console.log(this.$store.state.customTimeout);
         let isMoning = this.$store.state.customTimeout;
-        if (isMoning != 0) {
+        if (isMoning) {
             this.monTxt = '正在监控';
             this.isMon = true;
             this.interval = isMoning;
@@ -156,7 +163,7 @@ export default {
             return dateDiff >= standard;
         },
         cellBg({ row, column, rowIndex, columnIndex }) {
-            if (columnIndex == 2) {
+            if (columnIndex == 3) {
                 if (this.chagneBg(row.ctm)) {
                     return 'background:rgb(165,42,42);text-align:center;';
                 }
@@ -171,21 +178,20 @@ export default {
         monBtn() {
             this.isMon = !this.isMon;
             if (this.isMon) {
-                this.monTxt = '关闭监控';
+                this.monTxt = '正在监控';
                 this.monitoring();
+                console.log(this.interval);
             } else {
                 this.monTxt = '开启监控';
                 window.clearInterval(this.interval);
-                this.$store.commit('setCustomMonitoring', 0);
+                this.$store.commit('setCustomMonitoring', null);
             }
         },
         monitoring() {
             this.interval = window.setInterval(() => {
                 this.getData();
-                // console.log(1);
-                // console.log(this.interval);
-                this.$store.commit('setCustomMonitoring', this.interval);
             }, this.num * 1000);
+            this.$store.commit('setCustomMonitoring', this.interval);
         },
         handleCurrentChange(val) {
             this.currentPage = val;

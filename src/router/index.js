@@ -46,7 +46,7 @@ export default new Router({
                 {
                     path: '/BreachProcessing',
                     component: () => import('../components/page/BreachProcessing.vue'),
-                    meta: { title: '违约处理' }
+                    meta: { title: '异常处理' }
                 },
                 {
                     path: '/404',

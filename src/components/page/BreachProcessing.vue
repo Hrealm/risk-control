@@ -9,8 +9,8 @@
                     style="width:200px; margin-left:20px; margin-right:0px;"
                 ></el-input>
             </div>
-            <el-button type="success" style="width:80px;margin-left:20px;" @click="getData">查 找</el-button>
-            <el-button type="success" style="width:80px;margin-left:20px;" @click="passBtn">审核通过</el-button>
+            <el-button style="width:80px;margin-left:20px;" @click="getData">查 找</el-button>
+            <el-button style="width:80px;margin-left:20px;" @click="passBtn">审核通过</el-button>
             <!-- <div class="audit">
                 <el-button type="success" style="margin-top:20px;">审核通过</el-button>
             </div>-->
@@ -38,7 +38,11 @@
                 <el-table-column prop="on" label="货物名称" width="120"></el-table-column>
                 <el-table-column prop="dw" label="重量(吨)" width="100"></el-table-column>
                 <el-table-column prop="dv" label="体积(方)" width="100"></el-table-column>
-                <el-table-column prop="dis" label="距离" width="100"></el-table-column>
+                <el-table-column prop="dis" label="距离(公里)" width="100">
+                    <template slot-scope="scope">
+                        <span>{{Math.round(scope.row.dis)}}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="dch" label="服务费(元)" width="100">
                     <template slot-scope="scope">
                         <span style="color:red;">{{scope.row.dch}}</span>
@@ -213,10 +217,14 @@ export default {
                         });
                         this.getData();
                     } else {
-                        this.$message({
-                            message: res.data.hd.rmsg,
-                            type: 'warning'
+                        this.$alert(res.data.hd.rmsg, '提示', {
+                            confirmButtonText: '确定',
+                            callback: function() {}
                         });
+                        // this.$message({
+                        //     message: res.data.hd.rmsg,
+                        //     type: 'warning'
+                        // });
                     }
                 });
         },
