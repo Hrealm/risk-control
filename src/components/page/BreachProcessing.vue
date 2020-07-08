@@ -187,6 +187,8 @@ export default {
             this.currentRow = val;
         },
         passBtn() {
+            // console.log(this.currentRow);
+            
             if (!this.currentRow) {
                 this.$alert('请选择需要操作的运单！', '提示', {
                     confirmButtonText: '确定',
@@ -196,7 +198,7 @@ export default {
             }
             var bd = {
                 tid: this.loginData.tid,
-                wid: this.currentRow.wcd,
+                wid: this.currentRow.wid,
                 plt: 2,
                 dc: ''
             };

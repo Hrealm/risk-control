@@ -21,7 +21,12 @@
                     :disabled="isMon"
                 ></el-input>
                 <span>运单状态</span>
-                <el-select v-model="wbValue" placeholder="全部" style="margin:0 0 0px 20px;" :disabled="isMon">
+                <el-select
+                    v-model="wbValue"
+                    placeholder="全部"
+                    style="margin:0 0 0px 20px;"
+                    :disabled="isMon"
+                >
                     <el-option
                         v-for="item in options"
                         :key="item.value"
@@ -77,6 +82,11 @@
                 <el-table-column prop="qzte" label="计划装货时间" width="180"></el-table-column>
                 <el-table-column prop="qxte" label="计划卸货时间" width="180"></el-table-column>
                 <el-table-column prop="ctm" label="创建时间" width="180"></el-table-column>
+                <el-table-column fixed="right" label="操作" width="100">
+                    <template slot-scope="scope">
+                        <el-button @click="handleClick(scope.row)" type="text" size="small">运输轨迹</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
         </div>
         <div class="page">
@@ -160,7 +170,7 @@ export default {
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
-                st: this.wbValue * 1 || 9,
+                st: this.wbValue * 1 || 0,
                 ocd: '',
                 ss: this.sourceInfoInput,
                 cid: '',
@@ -226,12 +236,15 @@ export default {
             this.interval = setInterval(() => {
                 this.getData();
             }, this.num * 1000);
-                this.$store.commit('setWaybillMonitoring', this.interval);
+            this.$store.commit('setWaybillMonitoring', this.interval);
         },
         handleCurrentChange(val) {
             this.currentPage = val;
             this.getData();
             console.log(`当前页: ${val}`);
+        },
+        handleClick(){
+            
         }
     }
 };
