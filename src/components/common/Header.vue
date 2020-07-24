@@ -69,11 +69,20 @@ export default {
         // 用户名下拉菜单选择事件
         handleCommand(command) {
             if (command == 'loginout') {
-                localStorage.removeItem('vuex');
-                var exp = new Date();
-                exp.setTime(exp.getTime() - 1);
-                document.cookie = `login=${document.cookie.match(new RegExp("(^| )"+'login'+"=([^;]*)(;|$)"))[2]};expires=${exp.toGMTString()}`;
-                this.$router.push('/login');
+                this.$confirm('是否退出登录','提示',{
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(()=>{
+                    localStorage.removeItem('vuex');
+                    var exp = new Date();
+                    exp.setTime(exp.getTime() - 1);
+                    document.cookie = `login=${document.cookie.match(new RegExp("(^| )"+'login'+"=([^;]*)(;|$)"))[2]};expires=${exp.toGMTString()}`;
+                    this.$router.push('/login');
+                }).catch(()=>{
+                    
+                })
+                
             }
         },
         // 侧边栏折叠

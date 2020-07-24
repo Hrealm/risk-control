@@ -1,110 +1,128 @@
 <template>
-    <div class="container">
-        <div class="top">
-            <div class="frequency">
-                <span>监控频率（秒）</span>
-                <el-input-number
-                    v-model="num"
-                    controls-position="right"
-                    @change="handleChange"
-                    :min="5"
-                    :max="10"
+    <div>
+        <div class="container" v-if="isShowCt">
+            <div class="top">
+                <div class="frequency">
+                    <span>监控频率（秒）</span>
+                    <el-input-number
+                        v-model="num"
+                        controls-position="right"
+                        @change="handleChange"
+                        :min="5"
+                        :max="10"
+                        :disabled="isMon"
+                    ></el-input-number>
+                </div>
+                <div class="sourceInfo">
+                    <span>运单信息</span>
+                    <el-input
+                        v-model="sourceInfoInput"
+                        clearable
+                        style="width:200px; margin-left:20px; margin-right:20px;"
+                        :disabled="isMon"
+                    ></el-input>
+                    <span>运单状态</span>
+                    <el-select
+                        v-model="wbValue"
+                        placeholder="全部"
+                        style="margin:0 0 0px 20px;"
+                        :disabled="isMon"
+                    >
+                        <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                        ></el-option>
+                    </el-select>
+                </div>
+                <el-button @click="monBtn" :type="isMon ? 'primary' : ''">{{monTxt}}</el-button>
+                <el-button
+                    style="width:80px;margin-left:20px;"
                     :disabled="isMon"
-                ></el-input-number>
+                    @click="getData"
+                >查 找</el-button>
             </div>
-            <div class="sourceInfo">
-                <span>运单信息</span>
-                <el-input
-                    v-model="sourceInfoInput"
-                    clearable
-                    style="width:200px; margin-left:20px; margin-right:20px;"
-                    :disabled="isMon"
-                ></el-input>
-                <span>运单状态</span>
-                <el-select
-                    v-model="wbValue"
-                    placeholder="全部"
-                    style="margin:0 0 0px 20px;"
-                    :disabled="isMon"
+            <div class="contentData">
+                <el-table
+                    :data="tableData"
+                    border
+                    class="table"
+                    ref="multipleTable"
+                    header-cell-class-name="table-header"
+                    :height="tableHeight"
+                    :fit="true"
+                    :header-cell-style="headClass"
+                    :cell-style="cellBg"
                 >
-                    <el-option
-                        v-for="item in options"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                    ></el-option>
-                </el-select>
+                    <el-table-column type="index" width="50"></el-table-column>
+                    <el-table-column prop="wcd" label="运单编号" width="120"></el-table-column>
+                    <el-table-column prop="ocd" label="关联订单" width="120"></el-table-column>
+                    <el-table-column prop="st" label="运单状态" width="120" :formatter="stateFormat"></el-table-column>
+                    <el-table-column prop="zct" label="起运地" width="150" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="xct" label="目的地" width="150" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="on" label="货物名称" width="120"></el-table-column>
+                    <el-table-column prop="dw" label="重量(吨)" width="100"></el-table-column>
+                    <el-table-column prop="dv" label="体积(方)" width="100"></el-table-column>
+                    <el-table-column prop="dis" label="距离(公里)" width="100">
+                        <template slot-scope="scope">
+                            <span>{{Math.round(scope.row.dis)}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="dch" label="服务费(元)" width="100">
+                        <template slot-scope="scope">
+                            <span style="color:red;">{{scope.row.dch}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="yf" label="运费(元)" width="100">
+                        <template slot-scope="scope">
+                            <span style="color:red;">{{scope.row.yf}}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="cne" label="司机名称" width="100"></el-table-column>
+                    <el-table-column prop="cph" label="司机电话" width="130"></el-table-column>
+                    <el-table-column prop="cn" label="车牌号" width="100"></el-table-column>
+                    <el-table-column prop="bne" label="负责客服" width="100"></el-table-column>
+                    <el-table-column prop="dne" label="负责调度" width="100"></el-table-column>
+                    <el-table-column prop="qzte" label="计划装货时间" width="180"></el-table-column>
+                    <el-table-column prop="qxte" label="计划卸货时间" width="180"></el-table-column>
+                    <el-table-column prop="ctm" label="创建时间" width="180"></el-table-column>
+                    <el-table-column fixed="right" label="操作" width="100">
+                        <template slot-scope="scope">
+                            <el-button @click="handleClick(scope.row)" type="text" size="small">运输轨迹</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
             </div>
-            <el-button @click="monBtn" :type="isMon ? 'primary' : ''">{{monTxt}}</el-button>
-            <el-button style="width:80px;margin-left:20px;" :disabled="isMon" @click="getData">查 找</el-button>
+            <div class="page">
+                <el-pagination
+                    @current-change="handleCurrentChange"
+                    :current-page="currentPage"
+                    :page-size="15"
+                    layout="total,  prev, pager, next, jumper"
+                    :total="totalNumber"
+                ></el-pagination>
+            </div>
         </div>
-        <div class="contentData">
-            <el-table
-                :data="tableData"
-                border
-                class="table"
-                ref="multipleTable"
-                header-cell-class-name="table-header"
-                :height="tableHeight"
-                :fit="true"
-                :header-cell-style="headClass"
-                :cell-style="cellBg"
-            >
-                <el-table-column type="index" width="50"></el-table-column>
-                <el-table-column prop="wcd" label="运单编号" width="120"></el-table-column>
-                <el-table-column prop="ocd" label="关联订单" width="120"></el-table-column>
-                <el-table-column prop="st" label="运单状态" width="120" :formatter="stateFormat"></el-table-column>
-                <el-table-column prop="zct" label="起运地" width="150"></el-table-column>
-                <el-table-column prop="xct" label="目的地" width="150"></el-table-column>
-                <el-table-column prop="on" label="货物名称" width="120"></el-table-column>
-                <el-table-column prop="dw" label="重量(吨)" width="100"></el-table-column>
-                <el-table-column prop="dv" label="体积(方)" width="100"></el-table-column>
-                <el-table-column prop="dis" label="距离(公里)" width="100">
-                    <template slot-scope="scope">
-                        <span>{{Math.round(scope.row.dis)}}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="dch" label="服务费(元)" width="100">
-                    <template slot-scope="scope">
-                        <span style="color:red;">{{scope.row.dch}}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="yf" label="运费(元)" width="100">
-                    <template slot-scope="scope">
-                        <span style="color:red;">{{scope.row.yf}}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="cne" label="司机名称" width="100"></el-table-column>
-                <el-table-column prop="cph" label="司机电话" width="130"></el-table-column>
-                <el-table-column prop="cn" label="车牌号" width="100"></el-table-column>
-                <el-table-column prop="bne" label="负责客服" width="100"></el-table-column>
-                <el-table-column prop="dne" label="负责调度" width="100"></el-table-column>
-                <el-table-column prop="qzte" label="计划装货时间" width="180"></el-table-column>
-                <el-table-column prop="qxte" label="计划卸货时间" width="180"></el-table-column>
-                <el-table-column prop="ctm" label="创建时间" width="180"></el-table-column>
-                <el-table-column fixed="right" label="操作" width="100">
-                    <template slot-scope="scope">
-                        <el-button @click="handleClick(scope.row)" type="text" size="small">运输轨迹</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </div>
-        <div class="page">
-            <el-pagination
-                @current-change="handleCurrentChange"
-                :current-page="currentPage"
-                :page-size="15"
-                layout="total,  prev, pager, next, jumper"
-                :total="totalNumber"
-            ></el-pagination>
-        </div>
+        <track-transportation
+            v-if="isShowTt"
+            ref="tTransportation"
+            @goback="goback"
+            :getWayData="waybillData"
+            :getLoginData="loginData"
+        ></track-transportation>
     </div>
 </template>
 
 <script>
+import request from '../../utils/request.js';
+import trackTransportation from './trackTransportation.vue';
 export default {
     data() {
         return {
+            waybillData: {},
+            isShowTt: false,
+            isShowCt: true,
             num: 5,
             sourceInfoInput: '',
             tableData: [],
@@ -163,10 +181,21 @@ export default {
             this.tableHeight = window.innerHeight - this.$refs.multipleTable.$el.offsetTop - 160;
         });
     },
-    components: {},
+    components: {
+        trackTransportation
+    },
     methods: {
         //运单监控
-        getData() {
+        async getData() {
+            if (this.sourceInfoInput.trim()) {
+                if (this.sourceInfoInput.length < 2) {
+                    this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
+                        confirmButtonText: '确定',
+                        callback: () => {}
+                    });
+                    return;
+                }
+            }
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -181,27 +210,47 @@ export default {
                 pg: this.currentPage,
                 sz: this.pageSize
             };
-            this.$axios
-                .post('/30017', {
-                    hd: {
-                        pi: 30017,
-                        si: this.loginData.si,
-                        sq: 9
-                    },
-                    bd: bd
+            let hd = {
+                pi: 30017,
+                si: this.loginData.si,
+                sq: 9
+            };
+            let resData = await request('/30017', hd, bd);
+            if(resData.hd.rid >= 0){
+                let data = JSON.parse(resData.bd);
+                this.totalNumber = data.pg.tn;
+                this.tableData = data.olst;
+            }else{
+                this.$message({
+                    type: 'error',
+                    message: resData.hd.msg
                 })
-                .then(res => {
-                    let data = JSON.parse(res.data.bd);
-                    this.totalNumber = data.pg.tn;
-                    this.tableData = data.olst;
-                    // console.log(data.olst);
-                });
+            }
+            // this.$axios
+            //     .post('/30017', {
+            //         hd: {
+            //             pi: 30017,
+            //             si: this.loginData.si,
+            //             sq: 9
+            //         },
+            //         bd: bd
+            //     })
+            //     .then(res => {
+            //         let data = JSON.parse(res.data.bd);
+            //         this.totalNumber = data.pg.tn;
+            //         this.tableData = data.olst;
+            //         // console.log(data.olst);
+            //     });
         },
         handleChange(value) {
             // console.log(value);
         },
         cellBg({ row, column, rowIndex, columnIndex }) {
-            return 'text-align:center;';
+            if (columnIndex == 11 || columnIndex == 10 || columnIndex == 9 || columnIndex == 8 || columnIndex == 7) {
+                return 'text-align:right;';
+            } else {
+                return 'text-align:center;';
+            }
         },
         headClass() {
             return 'background:#ff0000;color:#606266;text-align:center;';
@@ -243,8 +292,16 @@ export default {
             this.getData();
             console.log(`当前页: ${val}`);
         },
-        handleClick(){
-            
+        handleClick(row) {
+            this.waybillData = row;
+            this.isShowTt = true;
+            this.isShowCt = false;
+            // console.log(this.isShowTt);
+        },
+        goback() {
+            this.isShowTt = false;
+            this.isShowCt = true;
+            this.getData();
         }
     }
 };

@@ -38,7 +38,7 @@
             >
                 <el-table-column type="index" width="50"></el-table-column>
                 <el-table-column prop="ocd" label="订单编号" width="130"></el-table-column>
-                <el-table-column prop="st" label="订单状态" width="130"></el-table-column>
+                <el-table-column prop="st" label="订单状态" width="130" :formatter="stateFormat"></el-table-column>
                 <el-table-column prop="zct" label="起运地" width="180"></el-table-column>
                 <el-table-column prop="xct" label="目的地" width="180"></el-table-column>
                 <el-table-column prop="on" label="货物名称" width="150"></el-table-column>
@@ -71,6 +71,7 @@
 </template>
 
 <script>
+import request from '../../utils/request.js';
 export default {
     data() {
         return {
@@ -104,7 +105,16 @@ export default {
     components: {},
     methods: {
         // 订单监控
-        getData() {
+        async getData() {
+            if (this.sourceInfoInput.trim()) {
+                if (this.sourceInfoInput.length < 2) {
+                    this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
+                        confirmButtonText: '确定',
+                        callback: () => {}
+                    });
+                    return;
+                }
+            }
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -117,27 +127,47 @@ export default {
                 pg: this.currentPage,
                 sz: this.pageSize
             };
-            this.$axios
-                .post('/30005', {
-                    hd: {
-                        pi: 30005,
-                        si: this.loginData.si,
-                        sq: 9
-                    },
-                    bd: bd
+            let hd = {
+                pi: 30005,
+                si: this.loginData.si,
+                sq: 9
+            };
+            let resData = await request('/30005', hd, bd);
+            if(resData.hd.rid >= 0){
+                let data = JSON.parse(resData.bd);
+                this.totalNumber = data.pg.tn;
+                this.tableData = data.olst;
+            }else{
+                this.$message({
+                    type: 'error',
+                    message: resData.hd.msg
                 })
-                .then(res => {
-                    let data = JSON.parse(res.data.bd);
-                    this.totalNumber = data.pg.tn;
-                    this.tableData = data.olst;
-                    // console.log(data.olst);
-                });
+            }
+            // this.$axios
+            //     .post('/30005', {
+            //         hd: {
+            //             pi: 30005,
+            //             si: this.loginData.si,
+            //             sq: 9
+            //         },
+            //         bd: bd
+            //     })
+            //     .then(res => {
+            //         let data = JSON.parse(res.data.bd);
+            //         this.totalNumber = data.pg.tn;
+            //         this.tableData = data.olst;
+            //         // console.log(data.olst);
+            //     });
         },
         handleChange(value) {
             // console.log(this.num * 1000);
         },
         cellBg({ row, column, rowIndex, columnIndex }) {
-            return 'text-align:center;';
+            if (columnIndex == 6 || columnIndex == 9 || columnIndex == 8 || columnIndex == 7) {
+                return 'text-align:right;';
+            } else {
+                return 'text-align:center;';
+            }
         },
         headClass() {
             return 'background:#ff0000;color:#606266;text-align:center;';
@@ -163,6 +193,23 @@ export default {
             this.currentPage = val;
             this.getData();
             // console.log(`当前页: ${val}`);
+        },
+        stateFormat(row) {
+            if (row.st == 0) {
+                return '全部';
+            }
+            if (row.st == 1) {
+                return '待接单';
+            }
+            if (row.st == 2) {
+                return '待派车';
+            }
+            if (row.st == 3) {
+                return '已派车';
+            }
+            if (row.st == 4) {
+                return '已撤单';
+            }
         }
     }
 };

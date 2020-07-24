@@ -8,7 +8,7 @@
         </div>
         <div class="center">
             <div class="ms-login">
-                <div class="ms-title">中象福达运营商风控系统</div>
+                <div class="ms-title">运营商风控系统</div>
                 <el-form
                     :model="param"
                     :rules="rules"
@@ -43,7 +43,7 @@
                             v-model="param.verification"
                             @blur="blur"
                             size="medium"
-                            @keyup.enter.native="checkForm"
+                            @keyup.enter.native="debounce"
                         ></el-input>
 
                         <div class="divIdentifyingCode" @click="getIdentifyingCode(true)">
@@ -81,6 +81,7 @@ export default {
     data: function() {
         return {
             loginBut: false,
+            enterBut: true,
             codeImg: '',
             codeID: '',
             show: false,
@@ -93,7 +94,8 @@ export default {
                 username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
                 password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
                 verification: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
-            }
+            },
+            timer: null
         };
     },
     created() {
@@ -136,16 +138,28 @@ export default {
                 this.show = false;
             }
         },
+        //回车防抖
+        debounce(){
+            if(this.enterBut)this.checkForm();
+            this.enterBut = false;
+            clearTimeout(this.timer);
+            this.timer = setTimeout(()=>{
+                // if(this.enterBut)this.checkForm();
+                this.enterBut = true;
+            },1000)
+        },
         checkForm() {
             // let action = this.$store.state.Login.url + '/10001';
             // 加密处理
             var curTime = new Date().getTime();
             var hs_pwd = AESUTIL(this.param.username + '_' + this.param.password, this.param.username + '|' + curTime);
             let pwd1 = CryptoJS.enc.Utf8.parse(hs_pwd);
-            if (!this.param.username || !this.param.password) {
-                this.open2('账号、密码不能为空');
+            if (!this.param.username) {
+                // this.open2('账号不能为空');
+            }else if(!this.param.password){
+                // this.open2('密码不能为空');
             } else if (this.param.verification.length == 0) {
-                this.open2('请输入验证码');
+                // this.open2('请输入验证码');
             } else {
                 var bd = {
                     ls: 19,
@@ -175,6 +189,8 @@ export default {
                         if (rid >= 0) {
                             let loginData = JSON.parse(res.data.bd);
                             this.$store.commit('setLoginData', loginData);
+                            let key = cryptoJS.md5(this.param.username + '_' + this.param.password, 3);
+                            this.$store.commit('setKey',key);
                             var Days = 7;
                             var exp = new Date();
                             exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
@@ -276,7 +292,7 @@ export default {
             this.$message({
                 message: text,
                 type: 'error',
-                duration: 900
+                duration: 700
             });
         }
     },

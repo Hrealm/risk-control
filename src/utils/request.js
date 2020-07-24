@@ -1,34 +1,26 @@
 import axios from 'axios';
+import encryptUtil from '../assets/js/encryptUtil.js'
+import store from '../store/index.js'
 
-const service = axios.create({
-    // process.env.NODE_ENV === 'development' 来判断是否开发环境
-    // easy-mock服务挂了，暂时不使用了
-    // baseURL: 'https://www.easy-mock.com/mock/592501a391470c0ac1fab128',
-    timeout: 5000
-});
+async function request(url, hd, bd) {
+    let loginData = store.state.loginData;
+    let bdStr = JSON.stringify(bd);
+    let sk = encryptUtil.decrypt(loginData.ct, store.state.key).split('|')[0];
+    if (loginData.em) bd = encryptUtil.encrypt(bdStr, sk);
 
-service.interceptors.request.use(
-    config => {
-        return config;
-    },
-    error => {
-        console.log(error);
-        return Promise.reject();
-    }
-);
+    // async-await 语法
+    let res = await axios.post(url, { hd: hd, bd: bd });
+    if (loginData.em) res.data.bd = encryptUtil.decrypt(res.data.bd, sk);
+    return res.data;
 
-service.interceptors.response.use(
-    response => {
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            Promise.reject();
-        }
-    },
-    error => {
-        console.log(error);
-        return Promise.reject();
-    }
-);
+    // promise 语法
+    // return new Promise((resolve, reject) => {
+    //     axios.post(url, { hd: hd, bd: bd }).then(res => {
+    //         if (loginData.em) res.data.bd = encryptUtil.decrypt(res.data.bd, sk);
+    //         resolve(res.data)
+    //     }).catch(e => { reject(e) })
+    // })
 
-export default service;
+}
+
+export default request;

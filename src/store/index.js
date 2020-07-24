@@ -8,7 +8,8 @@ export default new vuex.Store({
         dispatchTimeout: null,
         customTimeout: null,
         orderTimeout: null,
-        waybillTimeout: null
+        waybillTimeout: null,
+        key: null
     },
     mutations: {
         setLoginData(state, n){
@@ -25,6 +26,9 @@ export default new vuex.Store({
         },
         setWaybillMonitoring(state, n){
             state.waybillTimeout = n
+        },
+        setKey(state, n){
+            state.key = n
         }
     },
     plugins: [createPersistedState()]

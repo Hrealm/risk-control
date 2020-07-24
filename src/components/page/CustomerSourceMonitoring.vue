@@ -75,6 +75,7 @@
 </template>
 
 <script>
+import request from '../../utils/request.js'
 export default {
     data() {
         return {
@@ -109,7 +110,16 @@ export default {
     components: {},
     methods: {
         // 客服货源
-        getData() {
+        async getData() {
+            if(this.sourceInfoInput.trim()){
+                if(this.sourceInfoInput.length < 2){
+                    this.$alert('货源信息输入过短，最小长度为两个字符','提示',{
+                        confirmButtonText: '确定',
+                        callback: ()=>{}
+                    });
+                    return;
+                }
+            }
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -125,21 +135,39 @@ export default {
                 pg: this.currentPage,
                 sz: this.pageSize
             };
-            this.$axios
-                .post('/30001', {
-                    hd: {
-                        pi: 30001,
-                        si: this.loginData.si,
-                        sq: 9
-                    },
-                    bd: bd
+            let hd = {
+                pi: 30001,
+                si: this.loginData.si,
+                sq: 9
+            };
+            let resData = await request('/30001', hd, bd);
+            if(resData.hd.rid >= 0){
+                let data = JSON.parse(resData.bd);
+                this.totalNumber = data.pg.tn;
+                this.tableData = data.olst;
+            }else{
+                this.$message({
+                    type: 'error',
+                    message: resData.hd.msg
                 })
-                .then(res => {
-                    let data = JSON.parse(res.data.bd);
-                    this.totalNumber = data.pg.tn;
-                    this.tableData = data.olst;
-                    // console.log(data.olst);
-                });
+            }
+
+
+            // this.$axios
+            //     .post('/30001', {
+            //         hd: {
+            //             pi: 30001,
+            //             si: this.loginData.si,
+            //             sq: 9
+            //         },
+            //         bd: bd
+            //     })
+            //     .then(res => {
+            //         let data = JSON.parse(res.data.bd);
+            //         this.totalNumber = data.pg.tn;
+            //         this.tableData = data.olst;
+            //         // console.log(data.olst);
+            //     });
         },
         handleChange(value) {
             // console.log(this.num * 1000);
@@ -168,6 +196,8 @@ export default {
                     return 'background:rgb(165,42,42);text-align:center;';
                 }
                 return 'background:rgb(0,100,0);text-align:center;';
+            } else if(columnIndex == 10 || columnIndex == 9 || columnIndex == 8 || columnIndex == 7){
+                return 'text-align:right;';
             } else {
                 return 'text-align:center;';
             }
