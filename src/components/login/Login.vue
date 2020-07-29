@@ -11,7 +11,6 @@
                 <div class="ms-title">运营商风控系统</div>
                 <el-form
                     :model="param"
-                    :rules="rules"
                     ref="login"
                     label-width="0px"
                     class="ms-content"
@@ -41,7 +40,6 @@
                             type="verification"
                             placeholder="验证码"
                             v-model="param.verification"
-                            @blur="blur"
                             size="medium"
                             @keyup.enter.native="debounce"
                         ></el-input>
@@ -155,11 +153,11 @@ export default {
             var hs_pwd = AESUTIL(this.param.username + '_' + this.param.password, this.param.username + '|' + curTime);
             let pwd1 = CryptoJS.enc.Utf8.parse(hs_pwd);
             if (!this.param.username) {
-                // this.open2('账号不能为空');
+                this.open2('账号不能为空');
             }else if(!this.param.password){
-                // this.open2('密码不能为空');
+                this.open2('密码不能为空');
             } else if (this.param.verification.length == 0) {
-                // this.open2('请输入验证码');
+                this.open2('请输入验证码');
             } else {
                 var bd = {
                     ls: 19,

@@ -36,7 +36,11 @@
                 :header-cell-style="headClass"
                 :cell-style="cellBg"
             >
-                <el-table-column type="index" width="50"></el-table-column>
+                <el-table-column width="80">
+                    <template scope="scope">
+                        {{scope.$index + addIndex}}
+                    </template>
+                </el-table-column>
                 <el-table-column prop="ocd" label="订单编号" width="130"></el-table-column>
                 <el-table-column prop="st" label="订单状态" width="130" :formatter="stateFormat"></el-table-column>
                 <el-table-column prop="zct" label="起运地" width="180"></el-table-column>
@@ -75,6 +79,7 @@ import request from '../../utils/request.js';
 export default {
     data() {
         return {
+            addIndex: 1,
             num: 5,
             sourceInfoInput: '',
             tableData: [],
@@ -106,15 +111,15 @@ export default {
     methods: {
         // 订单监控
         async getData() {
-            if (this.sourceInfoInput.trim()) {
-                if (this.sourceInfoInput.length < 2) {
-                    this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
-                        confirmButtonText: '确定',
-                        callback: () => {}
-                    });
-                    return;
-                }
-            }
+            // if (this.sourceInfoInput.trim()) {
+            //     if (this.sourceInfoInput.length < 2) {
+            //         this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
+            //             confirmButtonText: '确定',
+            //             callback: () => {}
+            //         });
+            //         return;
+            //     }
+            // }
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -140,7 +145,7 @@ export default {
             }else{
                 this.$message({
                     type: 'error',
-                    message: resData.hd.msg
+                    message: resData.hd.rmsg
                 })
             }
             // this.$axios
@@ -191,6 +196,7 @@ export default {
         },
         handleCurrentChange(val) {
             this.currentPage = val;
+            this.addIndex = (this.currentPage - 1) * this.pageSize + 1;
             this.getData();
             // console.log(`当前页: ${val}`);
         },

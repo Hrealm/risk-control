@@ -61,7 +61,7 @@
                 </div>
                 <div class="center">
                     <el-tabs v-model="activeName" @tab-click="handleClick">
-                        <el-tab-pane label="方案一" name="first">
+                        <el-tab-pane label="速度优先" name="first" v-loading="isFirst">
                             <div class="map">
                                 <iframe
                                     :src="src"
@@ -72,7 +72,7 @@
                                 ></iframe>
                             </div>
                         </el-tab-pane>
-                        <el-tab-pane label="方案二" name="second">
+                        <el-tab-pane label="费用优先" name="second" v-loading="isFirst">
                             <div class="map">
                                 <iframe
                                     :src="src"
@@ -83,7 +83,7 @@
                                 ></iframe>
                             </div>
                         </el-tab-pane>
-                        <el-tab-pane label="方案三" name="third">
+                        <el-tab-pane label="距离优先" name="third" v-loading="isFirst">
                             <div class="map">
                                 <iframe
                                     :src="src"
@@ -105,7 +105,7 @@
                         <div class="title-left"></div>
                         <div class="text">司机定位</div>
                     </div>
-                    <el-button type="primary" class="titleBtn" @click="refresh">获取</el-button>
+                    <el-button type="primary" class="titleBtn" @click="refresh" :disabled="isClick">获取</el-button>
                 </div>
                 <div class="center">
                     <div class="table">
@@ -130,10 +130,10 @@
                         <div class="title-left"></div>
                         <div class="text">实时轨迹</div>
                     </div>
-                    <el-button type="primary" class="titleBtn">同步</el-button>
+                    <el-button type="primary" class="titleBtn" @click="synchronize" :disabled="isSync">同步</el-button>
                 </div>
                 <div class="center">
-                    <div class="realTimeMap">
+                    <div class="realTimeMap" v-loading="isReal">
                         <iframe
                             :src="srcReal"
                             frameborder="0"
@@ -156,6 +156,10 @@ export default {
     props: ['getWayData', 'getLoginData'],
     data() {
         return {
+            isClick: false,
+            isFirst: false,
+            isReal: false,
+            isSync: false,
             customerData: [],
             waybillData: this.getWayData,
             loginData: this.getLoginData,
@@ -168,6 +172,12 @@ export default {
         };
     },
     created() {
+        this.isFirst = true;
+        this.isReal = true;
+        setTimeout(() => {
+            this.isFirst = false;
+            this.isReal = false;
+        }, 2000);
         this.getData();
     },
     methods: {
@@ -189,7 +199,7 @@ export default {
                 let center = '';
                 let add = '';
                 let list = this.tableData;
-                if(list.length){
+                if (list.length) {
                     center = [list[list.length - 1].log, list[list.length - 1].lat];
                     let addArr = list[list.length - 1].add.split(' ');
                     // console.log(addArr);
@@ -199,7 +209,7 @@ export default {
             } else {
                 this.$message({
                     type: 'error',
-                    message: resData.hd.msg
+                    message: resData.hd.rmsg
                 });
             }
 
@@ -228,17 +238,30 @@ export default {
         },
         handleClick(tab, event) {
             if (tab.index == 0) {
+                this.isFirst = true;
+                setTimeout(() => {
+                    this.isFirst = false;
+                }, 2500);
                 this.src = `./_map.html?plan=1&zlng=${this.location.zlng}&zlat=${this.location.zlat}&xlng=${this.location.xlng}&xlat=${this.location.xlat}`;
             } else if (tab.index == 1) {
+                this.isFirst = true;
+                setTimeout(() => {
+                    this.isFirst = false;
+                }, 2500);
                 this.src = `./_map.html?plan=2&zlng=${this.location.zlng}&zlat=${this.location.zlat}&xlng=${this.location.xlng}&xlat=${this.location.xlat}`;
             } else if (tab.index == 2) {
-                this.src = `./_map.html?plan=4&zlng=${this.location.zlng}&zlat=${this.location.zlat}&xlng=${this.location.xlng}&xlat=${this.location.xlat}`;
+                this.isFirst = true;
+                setTimeout(() => {
+                    this.isFirst = false;
+                }, 2500);
+                this.src = `./_map.html?plan=3&zlng=${this.location.zlng}&zlat=${this.location.zlat}&xlng=${this.location.xlng}&xlat=${this.location.xlat}`;
             }
         },
         headClass() {
             return 'background:#ff0000;color:#606266;text-align:center;';
         },
         async refresh() {
+            this.isClick = true;
             let hd = {
                 pi: 43002,
                 si: this.loginData.si,
@@ -250,14 +273,18 @@ export default {
                 cn: this.waybillData.cn
             };
             let resData = await request('/43002', hd, bd);
-            if(resData.hd.rid >= 0){
+            if (resData.hd.rid >= 0) {
+                this.isClick = false;
                 this.getData();
-            }else{
+            } else {
+                this.isClick = false;
                 this.$message({
                     type: 'error',
-                    message: resData.hd.msg
-                })
+                    message: resData.hd.rmsg,
+                    duration:900
+                });
             }
+
             // this.$axios
             //     .post('/43002', {
             //         hd: {
@@ -279,6 +306,14 @@ export default {
             //         }
             //         // console.log(res.data.hd.rid);
             //     });
+        },
+        synchronize(){
+            this.isReal = true;
+            this.isSync = true;
+            setTimeout(() => {
+                this.isReal = false;
+                this.isSync = false;
+            }, 2000);
         },
         open1(text) {
             this.$message({
@@ -317,9 +352,11 @@ export default {
     background: #409eff;
 }
 .goods {
-    display: flex;
+    // display: flex;
+    display: -webkit-box;
     width: 100%;
     height: 100%;
+    background-color: #fff;
     .left {
         width: 700px;
         display: flex;
@@ -400,16 +437,22 @@ export default {
                 }
             }
             .center {
-                padding: 15px;
-                /deep/ .el-tabs__nav-scroll {
-                    padding: 0 34.4%;
+                // padding: 15px;
+                /deep/ .el-tabs {
+                    position: relative;
+                }
+                /deep/ .el-tabs__header {
+                    position: absolute;
+                    top: -41px;
+                    right: 0;
                 }
                 /deep/ .el-tabs__nav-wrap::after {
                     background-color: #fff;
                 }
                 .map {
                     width: 100%;
-                    height: 460px;
+                    height: 520px;
+                    margin-top: 30px;
                 }
             }
         }
@@ -477,7 +520,7 @@ export default {
             .realTimeMap {
                 margin-top: 30px;
                 width: 100%;
-                height: 500px;
+                height: 520px;
             }
         }
     }

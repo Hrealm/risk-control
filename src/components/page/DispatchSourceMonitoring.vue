@@ -36,7 +36,11 @@
                 :header-cell-style="headClass"
                 :cell-style="cellBg"
             >
-                <el-table-column type="index" width="50"></el-table-column>
+                <el-table-column width="80">
+                    <template scope="scope">
+                        {{scope.$index + addIndex}}
+                    </template>
+                </el-table-column>
                 <el-table-column prop="ocd" label="订单编号" width="130"></el-table-column>
                 <el-table-column prop="ctm" label="发布时间" width="180"></el-table-column>
                 <el-table-column label="等待时长" width="160">
@@ -79,6 +83,7 @@ import request from '../../utils/request.js';
 export default {
     data() {
         return {
+            addIndex: 1,
             num: 5,
             sourceInfoInput: '',
             tableData: [],
@@ -110,15 +115,15 @@ export default {
     methods: {
         // 调度货源
         async getData() {
-            if (this.sourceInfoInput.trim()) {
-                if (this.sourceInfoInput.length < 2) {
-                    this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
-                        confirmButtonText: '确定',
-                        callback: () => {}
-                    });
-                    return;
-                }
-            }
+            // if (this.sourceInfoInput.trim()) {
+            //     if (this.sourceInfoInput.length < 2) {
+            //         this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
+            //             confirmButtonText: '确定',
+            //             callback: () => {}
+            //         });
+            //         return;
+            //     }
+            // }
 
             this.loginData = this.$store.state.loginData;
             var bd = {
@@ -147,7 +152,7 @@ export default {
             } else {
                 this.$message({
                     type: 'error',
-                    message: resData.hd.msg
+                    message: resData.hd.rmsg
                 });
             }
             // this.$axios
@@ -221,6 +226,7 @@ export default {
         },
         handleCurrentChange(val) {
             this.currentPage = val;
+            this.addIndex = (this.currentPage - 1) * this.pageSize + 1; 
             this.getData();
             // console.log(`当前页: ${val}`);
         }

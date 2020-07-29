@@ -29,7 +29,9 @@
                 highlight-current-row
                 @current-change="rowCurrentChange"
             >
-                <el-table-column type="index" width="50"></el-table-column>
+                <el-table-column width="80">
+                    <template scope="scope">{{scope.$index + addIndex}}</template>
+                </el-table-column>
                 <el-table-column prop="wcd" label="运单编号" width="120"></el-table-column>
                 <el-table-column prop="ocd" label="关联订单" width="120"></el-table-column>
                 <el-table-column prop="st" label="运单状态" width="120" :formatter="stateFormat"></el-table-column>
@@ -78,6 +80,7 @@ import request from '../../utils/request.js';
 export default {
     data() {
         return {
+            addIndex: 1,
             sourceInfoInput: '',
             tableData: [],
             options: [
@@ -129,15 +132,15 @@ export default {
     methods: {
         //违约处理
         async getData() {
-            if (this.sourceInfoInput.trim()) {
-                if (this.sourceInfoInput.length < 2) {
-                    this.$alert('运单信息输入过短，最小长度为两个字符', '提示', {
-                        confirmButtonText: '确定',
-                        callback: () => {}
-                    });
-                    return;
-                }
-            }
+            // if (this.sourceInfoInput.trim()) {
+            //     if (this.sourceInfoInput.length < 2) {
+            //         this.$alert('运单信息输入过短，最小长度为两个字符', '提示', {
+            //             confirmButtonText: '确定',
+            //             callback: () => {}
+            //         });
+            //         return;
+            //     }
+            // }
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -165,7 +168,7 @@ export default {
             } else {
                 this.$message({
                     type: 'error',
-                    message: resData.hd.msg
+                    message: resData.hd.rmsg
                 });
             }
 
@@ -208,7 +211,7 @@ export default {
         },
         stateFormat(row) {
             let _val = row.st;
-            this.options.forEach(ele => {
+            this.options.forEach((ele) => {
                 for (const key in ele) {
                     if (key == 'value') {
                         if (ele[key] == _val) {
@@ -231,7 +234,7 @@ export default {
             if (!this.currentRow) {
                 this.$alert('请选择需要操作的运单！', '提示', {
                     confirmButtonText: '确定',
-                    callback: function() {}
+                    callback: function () {}
                 });
                 return;
             }
@@ -256,7 +259,7 @@ export default {
             } else {
                 this.$alert(res.data.hd.rmsg, '提示', {
                     confirmButtonText: '确定',
-                    callback: function() {}
+                    callback: function () {}
                 });
             }
             // this.$axios
@@ -289,6 +292,7 @@ export default {
         },
         handleCurrentChange(val) {
             this.currentPage = val;
+            this.addIndex = (this.currentPage - 1) * this.pageSize + 1;
             this.getData();
             // console.log(`当前页: ${val}`);
         }

@@ -1,17 +1,19 @@
 <!doctype html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
     <title>位置经纬度 + 驾车规划路线</title>
     <style type="text/css">
-    html,
-    body,
-    #container {
-      width: 100%;
-      height: 100%;
-    }
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
     </style>
     <style type="text/css">
         #panel {
@@ -23,118 +25,142 @@
             right: 10px;
             width: 280px;
         }
+
         #panel .amap-call {
             background-color: #009cf9;
             border-top-left-radius: 4px;
-   	        border-top-right-radius: 4px;
+            border-top-right-radius: 4px;
         }
+
         #panel .amap-lib-driving {
-	        border-bottom-left-radius: 4px;
-   	        border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
             overflow: hidden;
         }
-        .amap-toolbar{
+
+        .amap-toolbar {
             display: none;
         }
     </style>
     <!-- <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" /> -->
     <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
-    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=58cfa4f93f6fcb0406cc784da686683b&plugin=AMap.Driving"></script>
+    <script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.15&key=58cfa4f93f6fcb0406cc784da686683b&plugin=AMap.Driving"></script>
     <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
     <script src="./jquery-3.3.1.js"></script>
 </head>
+
 <body>
-<div id="container"></div>
-<div id="panel"></div>
-<script type="text/javascript">
+    <div id="container"></div>
+    <div id="panel"></div>
+    <script type="text/javascript">
 
-    var url = document.URL;
-    var urlArr = url.split("&");
-    var plan = urlArr[0].split("=")[1] || 1;
-    var zlng = urlArr[1].split("=")[1];
-    var zlat = urlArr[2].split("=")[1];
-    var xlng = urlArr[3].split("=")[1];
-    var xlat = urlArr[4].split("=")[1]; 
-    // console.log(urlArr,zlng,zlat,xlng,xlat);
+        var url = document.URL;
+        var urlArr = url.split("&");
+        var plan = urlArr[0].split("=")[1] || 1;
+        var zlng = urlArr[1].split("=")[1];
+        var zlat = urlArr[2].split("=")[1];
+        var xlng = urlArr[3].split("=")[1];
+        var xlat = urlArr[4].split("=")[1];
+        // var _policy;
+        // switch (plan) {
+        //     case 1:
+        //         _policy = AMap.DrivingPolicy.LEAST_TIME;
+        //         break;
+        //     case 2:
+        //         _policy = AMap.DrivingPolicy.LEAST_FEE;
+        //         break;
+        //     case 3:
+        //         _policy = AMap.DrivingPolicy.LEAST_DISTANCE;
+        //         break;
+        //     default:
+        //         _policy = AMap.DrivingPolicy.LEAST_TIME;
+        //         break;
+        // }
+        // console.log(plan,_policy);
+        // console.log(urlArr,zlng,zlat,xlng,xlat);
 
-    // let data = {
-    //     "hd": {
-    //         pi: 30078,
-    //         si: si,
-    //         sq:9
-    //     },
-    //     "bd": {
-    //         "tid": tid,
-    //         "wid": wid
-    //     }
-    // }
+        // let data = {
+        //     "hd": {
+        //         pi: 30078,
+        //         si: si,
+        //         sq:9
+        //     },
+        //     "bd": {
+        //         "tid": tid,
+        //         "wid": wid
+        //     }
+        // }
 
-    // $.ajax({
-    //     type: "POST",
-    //     url: "http://192.168.0.66:9010/30078",
-    //     contentType: 'application/json',
-    //     data: JSON.stringify(data),
-    //     dataType: 'json',
-    //     success: (res)=>{
-    //         let hd = res.hd;
-    //         let bd = JSON.parse(res.bd);
-    //         // longitude = [bd.zlng, bd.zlat];
-    //         // dimension = [bd.xlng, bd.xlat];
-
-
-    //         //基本地图加载
-    //         var map = new AMap.Map("container", {
-    //             resizeEnable: true,
-    //             // center: [116.397428, 39.90923],//地图中心点
-    //             zoom: 13 //地图显示的缩放级别
-    //         });
-    //         //构造路线导航类
-    //         var driving = new AMap.Driving({
-    //             map: map,
-    //             autoFitView: true,
-    //             // outlineColor: '#0091ea',
-    //             policy: plan
-    //         });
-    //         // 根据起终点经纬度规划驾车导航路线
-    //         driving.search(new AMap.LngLat(bd.zlng, bd.zlat), new AMap.LngLat(bd.xlng, bd.xlat), function (status, result) {
-    //             // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
-    //             if (status === 'complete') {
-    //                 log.success('绘制驾车路线完成')
-    //             } else {
-    //                 log.error('获取驾车数据失败：' + result)
-    //             }
-    //         });
-
-    //         // console.log(res);
-    //     },
-    //     error: (e)=>{
-    //         console.log(e);
-    //     }
-    // })
+        // $.ajax({
+        //     type: "POST",
+        //     url: "http://192.168.0.66:9010/30078",
+        //     contentType: 'application/json',
+        //     data: JSON.stringify(data),
+        //     dataType: 'json',
+        //     success: (res)=>{
+        //         let hd = res.hd;
+        //         let bd = JSON.parse(res.bd);
+        //         // longitude = [bd.zlng, bd.zlat];
+        //         // dimension = [bd.xlng, bd.xlat];
 
 
-    //基本地图加载
-    var map = new AMap.Map("container", {
-        resizeEnable: true,
-        // center: [116.397428, 39.90923],//地图中心点
-        zoom: 13 //地图显示的缩放级别
-    });
-    //构造路线导航类
-    var driving = new AMap.Driving({
-        map: map,
-        autoFitView: true,
-        // outlineColor: '#0091ea',
-        policy: plan
-    }); 
-    // 根据起终点经纬度规划驾车导航路线
-    driving.search(new AMap.LngLat(zlng, zlat), new AMap.LngLat(xlng, xlat), function(status, result) {
-        // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
-        if (status === 'complete') {
-            log.success('绘制驾车路线完成')
-        } else {
-            log.error('获取驾车数据失败：' + result)
-        }
-    });
-</script>
+        //         //基本地图加载
+        //         var map = new AMap.Map("container", {
+        //             resizeEnable: true,
+        //             // center: [116.397428, 39.90923],//地图中心点
+        //             zoom: 13 //地图显示的缩放级别
+        //         });
+        //         //构造路线导航类
+        //         var driving = new AMap.Driving({
+        //             map: map,
+        //             autoFitView: true,
+        //             // outlineColor: '#0091ea',
+        //             policy: plan
+        //         });
+        //         // 根据起终点经纬度规划驾车导航路线
+        //         driving.search(new AMap.LngLat(bd.zlng, bd.zlat), new AMap.LngLat(bd.xlng, bd.xlat), function (status, result) {
+        //             // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
+        //             if (status === 'complete') {
+        //                 log.success('绘制驾车路线完成')
+        //             } else {
+        //                 log.error('获取驾车数据失败：' + result)
+        //             }
+        //         });
+
+        //         // console.log(res);
+        //     },
+        //     error: (e)=>{
+        //         console.log(e);
+        //     }
+        // })
+
+
+        //基本地图加载
+        var map = new AMap.Map("container", {
+            resizeEnable: true,
+            // center: [116.397428, 39.90923],//地图中心点
+            zoom: 13 //地图显示的缩放级别
+        });
+        //构造路线导航类
+        var driving = new AMap.Driving({
+            map: map,
+            autoFitView: true,
+            // outlineColor: '#0091ea',
+            // policy: plan
+            policy: plan == 1 ? AMap.DrivingPolicy.LEAST_TIME : (plan == 2 ? AMap.DrivingPolicy.LEAST_FEE : AMap.DrivingPolicy.LEAST_DISTANCE)
+            // strategy: 2
+        });
+        // 根据起终点经纬度规划驾车导航路线
+        driving.search(new AMap.LngLat(zlng, zlat), new AMap.LngLat(xlng, xlat), function (status, result) {
+            // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
+            if (status === 'complete') {
+                log.success('绘制驾车路线完成')
+            } else {
+                log.error('获取驾车数据失败：' + result)
+            }
+        });
+    </script>
 </body>
+
 </html>

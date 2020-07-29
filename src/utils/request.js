@@ -10,12 +10,13 @@ async function request(url, hd, bd) {
 
     // async-await 语法
     let res = await axios.post(url, { hd: hd, bd: bd });
-    if (loginData.em) res.data.bd = encryptUtil.decrypt(res.data.bd, sk);
+    if(res.data.bd) {if (loginData.em) res.data.bd = encryptUtil.decrypt(res.data.bd, sk);}
     return res.data;
 
     // promise 语法
     // return new Promise((resolve, reject) => {
     //     axios.post(url, { hd: hd, bd: bd }).then(res => {
+    //         console.log(res);
     //         if (loginData.em) res.data.bd = encryptUtil.decrypt(res.data.bd, sk);
     //         resolve(res.data)
     //     }).catch(e => { reject(e) })

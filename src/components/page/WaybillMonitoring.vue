@@ -55,7 +55,11 @@
                     :header-cell-style="headClass"
                     :cell-style="cellBg"
                 >
-                    <el-table-column type="index" width="50"></el-table-column>
+                    <el-table-column width="80">
+                        <template scope="scope">
+                            {{scope.$index + addIndex}}
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="wcd" label="运单编号" width="120"></el-table-column>
                     <el-table-column prop="ocd" label="关联订单" width="120"></el-table-column>
                     <el-table-column prop="st" label="运单状态" width="120" :formatter="stateFormat"></el-table-column>
@@ -79,7 +83,7 @@
                             <span style="color:red;">{{scope.row.yf}}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="cne" label="司机名称" width="100"></el-table-column>
+                    <el-table-column prop="cne" label="司机名称" width="100" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="cph" label="司机电话" width="130"></el-table-column>
                     <el-table-column prop="cn" label="车牌号" width="100"></el-table-column>
                     <el-table-column prop="bne" label="负责客服" width="100"></el-table-column>
@@ -120,6 +124,7 @@ import trackTransportation from './trackTransportation.vue';
 export default {
     data() {
         return {
+            addIndex: 1,
             waybillData: {},
             isShowTt: false,
             isShowCt: true,
@@ -187,15 +192,15 @@ export default {
     methods: {
         //运单监控
         async getData() {
-            if (this.sourceInfoInput.trim()) {
-                if (this.sourceInfoInput.length < 2) {
-                    this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
-                        confirmButtonText: '确定',
-                        callback: () => {}
-                    });
-                    return;
-                }
-            }
+            // if (this.sourceInfoInput.trim()) {
+            //     if (this.sourceInfoInput.length < 2) {
+            //         this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
+            //             confirmButtonText: '确定',
+            //             callback: () => {}
+            //         });
+            //         return;
+            //     }
+            // }
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -223,7 +228,7 @@ export default {
             }else{
                 this.$message({
                     type: 'error',
-                    message: resData.hd.msg
+                    message: resData.hd.rmsg
                 })
             }
             // this.$axios
@@ -289,8 +294,9 @@ export default {
         },
         handleCurrentChange(val) {
             this.currentPage = val;
+            this.addIndex = (this.currentPage - 1) * this.pageSize + 1;
             this.getData();
-            console.log(`当前页: ${val}`);
+            // console.log(`当前页: ${val}`);
         },
         handleClick(row) {
             this.waybillData = row;

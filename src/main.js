@@ -13,7 +13,8 @@ import Axios from 'axios';
 import store from './store/index'
 // Vue.use(store);
 
-Axios.defaults.baseURL = 'http://192.168.0.230:9010'
+// Axios.defaults.baseURL = 'http://192.168.0.230:9010'
+Axios.defaults.baseURL = 'https://vtrade.gdzxjy.net'
 Vue.prototype.$axios = Axios
 
 Vue.config.productionTip = false;
