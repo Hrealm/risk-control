@@ -29,9 +29,7 @@
                 highlight-current-row
                 @current-change="rowCurrentChange"
             >
-                <el-table-column width="70">
-                    <template scope="scope">{{scope.$index + addIndex}}</template>
-                </el-table-column>
+                <el-table-column type="index" width="50"></el-table-column>
                 <el-table-column prop="wcd" label="运单编号" width="120"></el-table-column>
                 <el-table-column prop="ocd" label="关联订单" width="120"></el-table-column>
                 <el-table-column prop="st" label="运单状态" width="120" :formatter="stateFormat"></el-table-column>
@@ -76,11 +74,9 @@
 </template>
 
 <script>
-import request from '../../utils/request.js';
 export default {
     data() {
         return {
-            addIndex: 1,
             sourceInfoInput: '',
             tableData: [],
             options: [
@@ -131,16 +127,7 @@ export default {
     components: {},
     methods: {
         //违约处理
-        async getData() {
-            // if (this.sourceInfoInput.trim()) {
-            //     if (this.sourceInfoInput.length < 2) {
-            //         this.$alert('运单信息输入过短，最小长度为两个字符', '提示', {
-            //             confirmButtonText: '确定',
-            //             callback: () => {}
-            //         });
-            //         return;
-            //     }
-            // }
+        getData() {
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -155,54 +142,29 @@ export default {
                 pg: this.currentPage,
                 sz: this.pageSize
             };
-            let hd = {
-                pi: 30017,
-                si: this.loginData.si,
-                sq: 9
-            };
-            let resData = await request('/30017', hd, bd);
-            if (resData.hd.rid >= 0) {
-                let data = JSON.parse(resData.bd);
-                this.totalNumber = data.pg.tn;
-                this.tableData = data.olst;
-            } else {
-                this.$message({
-                    type: 'error',
-                    message: resData.hd.rmsg
+            this.$axios
+                .post('/30017', {
+                    hd: {
+                        pi: 30017,
+                        si: this.loginData.si,
+                        sq: 9
+                    },
+                    bd: bd
+                })
+                .then(res => {
+                    let data = JSON.parse(res.data.bd);
+                    this.totalNumber = data.pg.tn;
+                    this.tableData = data.olst;
+                    // console.log(data);
                 });
-            }
-
-            // this.$axios
-            //     .post('/30017', {
-            //         hd: {
-            //             pi: 30017,
-            //             si: this.loginData.si,
-            //             sq: 9
-            //         },
-            //         bd: bd
-            //     })
-            //     .then(res => {
-            //         // if (res.data.hd.rid >= 0) {
-            //         let data = JSON.parse(res.data.bd);
-            //         this.totalNumber = data.pg.tn;
-            //         this.tableData = data.olst;
-            //         // } else {
-            //         //     console.log(res.data);
-            //         //     // this.$alert('请选择需要操作的运单！', '提示', {
-            //         //     //     confirmButtonText: res.data.,
-            //         //     //     callback: function() {}
-            //         //     // });
-            //         // }
-            //         // console.log(data);
-            //     });
         },
         handleChange(value) {
             // console.log(value);
         },
         cellBg({ row, column, rowIndex, columnIndex }) {
-            if (columnIndex == 11 || columnIndex == 10 || columnIndex == 9 || columnIndex == 8 || columnIndex == 7) {
+            if(columnIndex == 11 || columnIndex == 10 || columnIndex == 9 || columnIndex == 8 || columnIndex == 7){
                 return 'text-align:right;';
-            } else {
+            }else{
                 return 'text-align:center;';
             }
         },
@@ -211,7 +173,7 @@ export default {
         },
         stateFormat(row) {
             let _val = row.st;
-            this.options.forEach((ele) => {
+            this.options.forEach(ele => {
                 for (const key in ele) {
                     if (key == 'value') {
                         if (ele[key] == _val) {
@@ -228,13 +190,13 @@ export default {
         rowCurrentChange(val) {
             this.currentRow = val;
         },
-        async passBtn() {
+        passBtn() {
             // console.log(this.currentRow);
-
+            
             if (!this.currentRow) {
                 this.$alert('请选择需要操作的运单！', '提示', {
                     confirmButtonText: '确定',
-                    callback: function () {}
+                    callback: function() {}
                 });
                 return;
             }
@@ -244,55 +206,36 @@ export default {
                 plt: 2,
                 dc: ''
             };
-            let hd = {
-                pi: 20016,
-                si: this.loginData.si,
-                sq: 9
-            };
-            let resData = await request('/20016', hd, bd);
-            if (resData.hd.rid >= 0) {
-                this.$message({
-                    message: '审核通过',
-                    type: 'success'
+            this.$axios
+                .post('/20016', {
+                    hd: {
+                        pi: 20016,
+                        si: this.loginData.si,
+                        sq: 9
+                    },
+                    bd: bd
+                })
+                .then(res => {
+                    if (res.data.hd.rid >= 0) {
+                        this.$message({
+                            message: '审核通过',
+                            type: 'success'
+                        });
+                        this.getData();
+                    } else {
+                        this.$alert(res.data.hd.rmsg, '提示', {
+                            confirmButtonText: '确定',
+                            callback: function() {}
+                        });
+                        // this.$message({
+                        //     message: res.data.hd.rmsg,
+                        //     type: 'warning'
+                        // });
+                    }
                 });
-                this.getData();
-            } else {
-                this.$alert(res.data.hd.rmsg, '提示', {
-                    confirmButtonText: '确定',
-                    callback: function () {}
-                });
-            }
-            // this.$axios
-            //     .post('/20016', {
-            //         hd: {
-            //             pi: 20016,
-            //             si: this.loginData.si,
-            //             sq: 9
-            //         },
-            //         bd: bd
-            //     })
-            //     .then(res => {
-            //         if (res.data.hd.rid >= 0) {
-            //             this.$message({
-            //                 message: '审核通过',
-            //                 type: 'success'
-            //             });
-            //             this.getData();
-            //         } else {
-            //             this.$alert(res.data.hd.rmsg, '提示', {
-            //                 confirmButtonText: '确定',
-            //                 callback: function() {}
-            //             });
-            //             // this.$message({
-            //             //     message: res.data.hd.rmsg,
-            //             //     type: 'warning'
-            //             // });
-            //         }
-            //     });
         },
         handleCurrentChange(val) {
             this.currentPage = val;
-            this.addIndex = (this.currentPage - 1) * this.pageSize + 1;
             this.getData();
             // console.log(`当前页: ${val}`);
         }
@@ -307,7 +250,7 @@ export default {
 .el-table__body tr.current-row > td {
     background-color: #d8e5f4;
 }
-/* .btn-prev:before {
+.btn-prev:before {
     content: '上一页';
 }
 .btn-next:before {
@@ -316,7 +259,7 @@ export default {
 .el-icon-arrow-left,
 .el-icon-arrow-right {
     display: none !important;
-} */
+}
 </style>
 <style scoped lang="scss">
 .container {
@@ -336,18 +279,6 @@ export default {
         margin-top: 20px;
         height: 32px;
         text-align: right;
-        /deep/ .el-pagination {
-            /deep/ .btn-prev:before {
-                content: '上一页';
-            }
-            /deep/ .btn-next:before {
-                content: '下一页';
-            }
-            /deep/ .el-icon-arrow-left,
-            .el-icon-arrow-right {
-                display: none !important;
-            }
-        }
     }
 }
 </style>

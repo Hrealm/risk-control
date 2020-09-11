@@ -13,6 +13,7 @@
                 <el-backtop target=".content"></el-backtop>
             </div>
         </div>
+        <div class="foot">版权所有：广东中象集运科技有限公司</div>
     </div>
 </template>
 
@@ -49,3 +50,23 @@ export default {
     }
 };
 </script>
+<style >
+.content-box {
+	margin-bottom: 23px;
+}
+.foot{
+	position: fixed;
+	bottom: 0px;
+	width: calc(100% - 251px);
+	background: #f5f5f5;
+	/* border-top: 1px solid #EEEEEE; */
+	color: #AAAAAA;
+	right: 0;
+	font-size: 10px;
+	letter-spacing: 1px;
+	z-index: 10;
+	height: 22px;
+	line-height: 22px;
+	text-align: center;
+}
+</style>

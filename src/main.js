@@ -13,8 +13,12 @@ import Axios from 'axios';
 import store from './store/index'
 // Vue.use(store);
 
-Axios.defaults.baseURL = 'http://192.168.0.66:9010'
-// Axios.defaults.baseURL = 'https://vtrade.gdzxjy.net'
+import dataV from '@jiaminghi/data-view'
+
+Vue.use(dataV)
+
+// Axios.defaults.baseURL = 'http://192.168.0.66:9010'
+Axios.defaults.baseURL = 'https://trade.gdzxjy.net'
 Vue.prototype.$axios = Axios
 
 Vue.config.productionTip = false;
@@ -30,13 +34,12 @@ const i18n = new VueI18n({
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {
 
-    //暂时注释
-    // if ((!localStorage.getItem('vuex') || !document.cookie) && to.path !== '/login') {
-    // // if (!document.cookie && to.path !== '/login') {
-    //     next('/login');
-    // }else{
+    if (!localStorage.getItem('vuex') && !document.cookie && to.path !== '/login') {
+    // if (!document.cookie && to.path !== '/login') {
+        next('/login');
+    }else{
         next();
-    // }
+    }
 
 
     // document.title = `${to.meta.title} | vue-manage-system`;

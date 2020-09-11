@@ -36,10 +36,8 @@
                 :header-cell-style="headClass"
                 :cell-style="cellBg"
             >
-                <el-table-column width="80">
-                    <template scope="scope">
-                        {{scope.$index + addIndex}}
-                    </template>
+                <el-table-column width="70">
+                    <template scope="scope">{{scope.$index + addIndex}}</template>
                 </el-table-column>
                 <el-table-column prop="ocd" label="订单编号" width="130"></el-table-column>
                 <el-table-column prop="ctm" label="发布时间" width="180"></el-table-column>
@@ -243,7 +241,7 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-.btn-prev:before {
+/* .btn-prev:before {
     content: '上一页';
 }
 .btn-next:before {
@@ -252,7 +250,7 @@ export default {
 .el-icon-arrow-left,
 .el-icon-arrow-right {
     display: none !important;
-}
+} */
 </style>
 <style scoped lang="scss">
 .container {
@@ -278,6 +276,18 @@ export default {
         margin-top: 20px;
         height: 32px;
         text-align: right;
+        /deep/ .el-pagination {
+            /deep/ .btn-prev:before {
+                content: '上一页';
+            }
+            /deep/ .btn-next:before {
+                content: '下一页';
+            }
+            /deep/ .el-icon-arrow-left,
+            .el-icon-arrow-right {
+                display: none !important;
+            }
+        }
     }
 }
 </style>

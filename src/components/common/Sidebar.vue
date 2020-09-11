@@ -62,6 +62,11 @@ export default {
                     title: '首页'
                 },
                 {
+                    icon: 'el-icon-data-line',
+                    index: 'DigitalHall',
+                    title: '数据大厅'
+                },
+                {
                     icon: 'el-icon-lx-cascades',
                     index: 'CustomerSource',
                     title: '客服货源监控'

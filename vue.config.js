@@ -3,7 +3,7 @@ module.exports = {
     assetsDir: 'static',
     productionSourceMap: false,
     devServer:{
-        port: 8090
+        port: 8091
     }
     // devServer: {
     //     proxy: {

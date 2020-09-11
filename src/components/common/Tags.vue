@@ -41,13 +41,13 @@
                 if (item) {
                     delItem.path === this.$route.fullPath && this.$router.push(item.path);
                 }else{
-                    this.$router.push('/');
+                    this.$router.push('/Dashboard');
                 }
             },
             // 关闭全部标签
             closeAll(){
                 this.tagsList = [];
-                this.$router.push('/');
+                this.$router.push('/Dashboard');
             },
             // 关闭其他标签
             closeOther(){
@@ -119,7 +119,8 @@
         overflow: hidden;
         background: #fff;
         padding-right: 120px;
-        box-shadow: 0 5px 10px #ddd;
+        box-shadow: 0 5px 8px #ddd;
+        margin-left: 2px;
     }
 
     .tags ul {

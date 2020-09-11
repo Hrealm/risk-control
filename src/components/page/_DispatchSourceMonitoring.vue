@@ -13,7 +13,7 @@
                 ></el-input-number>
             </div>
             <div class="sourceInfo">
-                <span>订单信息</span>
+                <span>货源信息</span>
                 <el-input
                     v-model="sourceInfoInput"
                     clearable
@@ -36,28 +36,30 @@
                 :header-cell-style="headClass"
                 :cell-style="cellBg"
             >
-                <el-table-column width="70">
-                    <template scope="scope">{{scope.$index + addIndex}}</template>
-                </el-table-column>
+                <el-table-column type="index" width="50"></el-table-column>
                 <el-table-column prop="ocd" label="订单编号" width="130"></el-table-column>
-                <el-table-column prop="st" label="订单状态" width="130" :formatter="stateFormat"></el-table-column>
+                <el-table-column prop="ctm" label="发布时间" width="180"></el-table-column>
+                <el-table-column label="等待时长" width="160">
+                    <template slot-scope="scope">
+                        <span style="color:#fff;">{{waitingTime(scope.row.btm)}}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="zct" label="起运地" width="180"></el-table-column>
                 <el-table-column prop="xct" label="目的地" width="180"></el-table-column>
                 <el-table-column prop="on" label="货物名称" width="150"></el-table-column>
-                <el-table-column prop="dw" label="重量(吨)" width="150"></el-table-column>
-                <el-table-column prop="dv" label="体积(方)" width="150"></el-table-column>
-                <el-table-column prop="dis" label="距离(公里)" width="120">
+                <el-table-column prop="pdw" label="重量(吨)" width="150"></el-table-column>
+                <el-table-column prop="pdv" label="体积(方)" width="150"></el-table-column>
+                <el-table-column prop="dis" label="距离(公里)" width="100">
                     <template slot-scope="scope">
                         <span>{{Math.round(scope.row.dis)}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="qyf" label="期望运费(元)" width="120">
+                <el-table-column prop="pqyf" label="期望运费(元)" width="150">
                     <template slot-scope="scope">
-                        <span style="color:red;">{{scope.row.qyf}}</span>
+                        <span style="color:red;">{{scope.row.pqyf}}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="zdy" label="装货日期" width="160"></el-table-column>
-                <el-table-column prop="ctm" label="创建时间" width="180"></el-table-column>
+                <el-table-column prop="pzdy" label="装货日期" width="170"></el-table-column>
             </el-table>
         </div>
         <div class="page">
@@ -73,11 +75,9 @@
 </template>
 
 <script>
-import request from '../../utils/request.js';
 export default {
     data() {
         return {
-            addIndex: 1,
             num: 5,
             sourceInfoInput: '',
             tableData: [],
@@ -91,9 +91,10 @@ export default {
             pageSize: 15
         };
     },
+    components: {},
     created() {
         this.getData();
-        let isMoning = this.$store.state.orderTimeout;
+        let isMoning = this.$store.state.dispatchTimeout;
         if (isMoning) {
             this.monTxt = '正在监控';
             this.isMon = true;
@@ -102,71 +103,73 @@ export default {
     },
     mounted() {
         this.$nextTick(() => {
-            this.tableHeight = window.innerHeight - this.$refs.multipleTable.$el.offsetTop - 170;
+            this.tableHeight = window.innerHeight - this.$refs.multipleTable.$el.offsetTop - 160;
         });
     },
-    components: {},
     methods: {
-        // 订单监控
-        async getData() {
-            // if (this.sourceInfoInput.trim()) {
-            //     if (this.sourceInfoInput.length < 2) {
-            //         this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
-            //             confirmButtonText: '确定',
-            //             callback: () => {}
-            //         });
-            //         return;
-            //     }
-            // }
+        // 调度货源
+        getData() {
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
-                st: 0,
+                zid: '',
+                xid: '',
+                ct: '',
+                cl: '',
+                te: '',
+                zdy: '',
                 ss: this.sourceInfoInput,
-                cid: '',
-                mid: '',
-                opid: '',
-                dsid: '',
+                qt: 0,
                 pg: this.currentPage,
                 sz: this.pageSize
             };
-            let hd = {
-                pi: 30005,
-                si: this.loginData.si,
-                sq: 9
-            };
-            let resData = await request('/30005', hd, bd);
-            if(resData.hd.rid >= 0){
-                let data = JSON.parse(resData.bd);
-                this.totalNumber = data.pg.tn;
-                this.tableData = data.olst;
-            }else{
-                this.$message({
-                    type: 'error',
-                    message: resData.hd.rmsg
+            this.$axios
+                .post('/30015', {
+                    hd: {
+                        pi: 30015,
+                        si: this.loginData.si,
+                        sq: 9
+                    },
+                    bd: bd
                 })
-            }
-            // this.$axios
-            //     .post('/30005', {
-            //         hd: {
-            //             pi: 30005,
-            //             si: this.loginData.si,
-            //             sq: 9
-            //         },
-            //         bd: bd
-            //     })
-            //     .then(res => {
-            //         let data = JSON.parse(res.data.bd);
-            //         this.totalNumber = data.pg.tn;
-            //         this.tableData = data.olst;
-            //         // console.log(data.olst);
-            //     });
+                .then(res => {
+                    // console.log(res.data);
+                    if (res.data.hd.rid >= 0) {
+                        let data = JSON.parse(res.data.bd);
+                        this.totalNumber = data.pg.tn;
+                        this.tableData = data.olst;
+                    }
+                    // console.log(data.olst);
+                });
         },
         handleChange(value) {
             // console.log(this.num * 1000);
         },
+        waitingTime(stime) {
+            var dateBegin = new Date(stime.replace(/-/g, '/'));
+            var dateEnd = new Date();
+            var dateDiff = dateEnd.getTime() - dateBegin.getTime(); //时间差的毫秒数
+            var dayDiff = Math.floor(dateDiff / (24 * 3600 * 1000)); //计算出相差天数
+            var leave1 = dateDiff % (24 * 3600 * 1000); //计算天数后剩余的毫秒数
+            var hours = Math.floor(leave1 / (3600 * 1000)); //计算出小时数
+            var leave2 = leave1 % (3600 * 1000); //计算小时数后剩余的毫秒数
+            var minutes = Math.floor(leave2 / (60 * 1000)); //计算相差分钟数
+            return `${dayDiff <= 0 ? 0 : dayDiff}天 ${hours <= 0 ? 0 : hours}小时 ${minutes <= 0 ? 0 : minutes}分钟`;
+        },
+        chagneBg(stime) {
+            var dateBegin = new Date(stime.replace(/-/g, '/'));
+            var dateEnd = new Date();
+            var dateDiff = dateEnd.getTime() - dateBegin.getTime(); //时间差的毫秒数
+            var standard = 10 * 60 * 1000;
+            return dateDiff >= standard;
+        },
         cellBg({ row, column, rowIndex, columnIndex }) {
-            if (columnIndex == 6 || columnIndex == 9 || columnIndex == 8 || columnIndex == 7) {
+            if (columnIndex == 3) {
+                if (this.chagneBg(row.ctm)) {
+                    return 'background:rgb(165,42,42);text-align:center;';
+                }
+                return 'background:rgb(0,100,0);text-align:center;';
+            } else if (columnIndex == 10 || columnIndex == 9 || columnIndex == 8 || columnIndex == 7) {
                 return 'text-align:right;';
             } else {
                 return 'text-align:center;';
@@ -182,38 +185,20 @@ export default {
                 this.monitoring();
             } else {
                 this.monTxt = '开启监控';
-                clearInterval(this.interval);
-                this.$store.commit('setOrderMonitoring', null);
+                window.clearInterval(this.interval);
+                this.$store.commit('setDispatchMonitoring', null);
             }
         },
         monitoring() {
-            this.interval = setInterval(() => {
+            this.interval = window.setInterval(() => {
                 this.getData();
             }, this.num * 1000);
-            this.$store.commit('setOrderMonitoring', this.interval);
+            this.$store.commit('setDispatchMonitoring', this.interval);
         },
         handleCurrentChange(val) {
             this.currentPage = val;
-            this.addIndex = (this.currentPage - 1) * this.pageSize + 1;
             this.getData();
             // console.log(`当前页: ${val}`);
-        },
-        stateFormat(row) {
-            if (row.st == 0) {
-                return '全部';
-            }
-            if (row.st == 1) {
-                return '待接单';
-            }
-            if (row.st == 2) {
-                return '待派车';
-            }
-            if (row.st == 3) {
-                return '已派车';
-            }
-            if (row.st == 4) {
-                return '已撤单';
-            }
         }
     }
 };
@@ -223,7 +208,7 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-/* .btn-prev:before {
+.btn-prev:before {
     content: '上一页';
 }
 .btn-next:before {
@@ -232,7 +217,7 @@ export default {
 .el-icon-arrow-left,
 .el-icon-arrow-right {
     display: none !important;
-} */
+}
 </style>
 <style scoped lang="scss">
 .container {
@@ -258,18 +243,6 @@ export default {
         margin-top: 20px;
         height: 32px;
         text-align: right;
-        /deep/ .el-pagination {
-            /deep/ .btn-prev:before {
-                content: '上一页';
-            }
-            /deep/ .btn-next:before {
-                content: '下一页';
-            }
-            /deep/ .el-icon-arrow-left,
-            .el-icon-arrow-right {
-                display: none !important;
-            }
-        }
     }
 }
 </style>

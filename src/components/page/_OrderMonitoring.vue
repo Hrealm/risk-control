@@ -36,9 +36,7 @@
                 :header-cell-style="headClass"
                 :cell-style="cellBg"
             >
-                <el-table-column width="70">
-                    <template scope="scope">{{scope.$index + addIndex}}</template>
-                </el-table-column>
+                <el-table-column type="index" width="50"></el-table-column>
                 <el-table-column prop="ocd" label="订单编号" width="130"></el-table-column>
                 <el-table-column prop="st" label="订单状态" width="130" :formatter="stateFormat"></el-table-column>
                 <el-table-column prop="zct" label="起运地" width="180"></el-table-column>
@@ -73,11 +71,9 @@
 </template>
 
 <script>
-import request from '../../utils/request.js';
 export default {
     data() {
         return {
-            addIndex: 1,
             num: 5,
             sourceInfoInput: '',
             tableData: [],
@@ -108,16 +104,7 @@ export default {
     components: {},
     methods: {
         // 订单监控
-        async getData() {
-            // if (this.sourceInfoInput.trim()) {
-            //     if (this.sourceInfoInput.length < 2) {
-            //         this.$alert('货源信息输入过短，最小长度为两个字符', '提示', {
-            //             confirmButtonText: '确定',
-            //             callback: () => {}
-            //         });
-            //         return;
-            //     }
-            // }
+        getData() {
             this.loginData = this.$store.state.loginData;
             var bd = {
                 tid: this.loginData.tid,
@@ -130,37 +117,21 @@ export default {
                 pg: this.currentPage,
                 sz: this.pageSize
             };
-            let hd = {
-                pi: 30005,
-                si: this.loginData.si,
-                sq: 9
-            };
-            let resData = await request('/30005', hd, bd);
-            if(resData.hd.rid >= 0){
-                let data = JSON.parse(resData.bd);
-                this.totalNumber = data.pg.tn;
-                this.tableData = data.olst;
-            }else{
-                this.$message({
-                    type: 'error',
-                    message: resData.hd.rmsg
+            this.$axios
+                .post('/30005', {
+                    hd: {
+                        pi: 30005,
+                        si: this.loginData.si,
+                        sq: 9
+                    },
+                    bd: bd
                 })
-            }
-            // this.$axios
-            //     .post('/30005', {
-            //         hd: {
-            //             pi: 30005,
-            //             si: this.loginData.si,
-            //             sq: 9
-            //         },
-            //         bd: bd
-            //     })
-            //     .then(res => {
-            //         let data = JSON.parse(res.data.bd);
-            //         this.totalNumber = data.pg.tn;
-            //         this.tableData = data.olst;
-            //         // console.log(data.olst);
-            //     });
+                .then(res => {
+                    let data = JSON.parse(res.data.bd);
+                    this.totalNumber = data.pg.tn;
+                    this.tableData = data.olst;
+                    // console.log(data.olst);
+                });
         },
         handleChange(value) {
             // console.log(this.num * 1000);
@@ -194,25 +165,24 @@ export default {
         },
         handleCurrentChange(val) {
             this.currentPage = val;
-            this.addIndex = (this.currentPage - 1) * this.pageSize + 1;
             this.getData();
             // console.log(`当前页: ${val}`);
         },
-        stateFormat(row) {
-            if (row.st == 0) {
-                return '全部';
+        stateFormat(row){
+            if(row.st == 0){
+                return '全部'
             }
-            if (row.st == 1) {
-                return '待接单';
+            if(row.st == 1){
+                return '待接单'
             }
-            if (row.st == 2) {
-                return '待派车';
+            if(row.st == 2){
+                return '待派车'
             }
-            if (row.st == 3) {
-                return '已派车';
+            if(row.st == 3){
+                return '已派车'
             }
-            if (row.st == 4) {
-                return '已撤单';
+            if(row.st == 4){
+                return '已撤单'
             }
         }
     }
@@ -223,7 +193,7 @@ export default {
     width: 100%;
     font-size: 14px;
 }
-/* .btn-prev:before {
+.btn-prev:before {
     content: '上一页';
 }
 .btn-next:before {
@@ -232,7 +202,7 @@ export default {
 .el-icon-arrow-left,
 .el-icon-arrow-right {
     display: none !important;
-} */
+}
 </style>
 <style scoped lang="scss">
 .container {
@@ -258,18 +228,6 @@ export default {
         margin-top: 20px;
         height: 32px;
         text-align: right;
-        /deep/ .el-pagination {
-            /deep/ .btn-prev:before {
-                content: '上一页';
-            }
-            /deep/ .btn-next:before {
-                content: '下一页';
-            }
-            /deep/ .el-icon-arrow-left,
-            .el-icon-arrow-right {
-                display: none !important;
-            }
-        }
     }
 }
 </style>

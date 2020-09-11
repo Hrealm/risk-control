@@ -7,11 +7,11 @@
                 </div>
                 <p class="com-info">全国24小时服务调度</p>
                 <p class="com-info">一站式安全无忧运输</p>
-                <p class="com-info">大数据决策分析赋能</p>
-                <p class="com-hotline">
+                <!-- <p class="com-info">大数据决策分析赋能</p> -->
+               <!-- <p class="com-hotline">
                     招商热线：
                     <span>400-666-7056</span> 转 2
-                </p>
+                </p> -->
             </div>
             <div class="footer-right clearFix fr">
                 <div class="footer-zxfd fl">
@@ -55,14 +55,14 @@ export default {};
     background-color: #020429;
     display: flex;
     flex-direction: column;
-    height: 265px;
+    height: 180px;
     .wrap {
         margin: 0 auto;
         padding: 20px 0;
         display: flex;
         .footer-left {
             color: #fff;
-            margin-right: 90px;
+            margin-right: 150px;
             .com-logoInfo {
                 height: 50px;
                 margin-bottom: 15px;
@@ -125,7 +125,7 @@ export default {};
                 margin-left: 150px;
             }
             .footer-contact {
-                margin-left: 100px;
+                margin-left: 150px;
             }
         }
     }

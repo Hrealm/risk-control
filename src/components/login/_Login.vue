@@ -2,17 +2,20 @@
     <div class="login-wrap">
         <div class="top">
             <div class="title">
-                <img src="../../assets/img/footer-logo.png" alt />
+                <img src="../../assets/img/head-logo.png" alt />
                 <!-- <img src="../../assets/img/dbg3.jpg" alt=""> -->
             </div>
         </div>
         <div class="center">
-            <div class="left">
-                <img src="../../assets/img/dbg5.png" alt />
-            </div>
             <div class="ms-login">
                 <div class="ms-title">交易中心风控系统</div>
-                <el-form :model="param" ref="login" label-width="0px" class="ms-content">
+                <el-form
+                    :model="param"
+                    :rules="rules"
+                    ref="login"
+                    label-width="0px"
+                    class="ms-content"
+                >
                     <el-form-item prop="username">
                         <el-input
                             v-model="param.username"
@@ -38,8 +41,9 @@
                             type="verification"
                             placeholder="验证码"
                             v-model="param.verification"
+                            @blur="blur"
                             size="medium"
-                            @keyup.enter.native="debounce"
+                            @keyup.enter.native="checkForm"
                         ></el-input>
 
                         <div class="divIdentifyingCode" @click="getIdentifyingCode(true)">
@@ -74,10 +78,9 @@ import CryptoJS from 'crypto-js';
 import foot from './footer.vue';
 import cryptoJS from '../../assets/js/encryptUtil.js';
 export default {
-    data: function () {
+    data: function() {
         return {
             loginBut: false,
-            enterBut: true,
             codeImg: '',
             codeID: '',
             show: false,
@@ -90,8 +93,7 @@ export default {
                 username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
                 password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
                 verification: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
-            },
-            timer: null
+            }
         };
     },
     created() {
@@ -100,7 +102,7 @@ export default {
         // this.$store.commit('setUrl', url);
     },
     methods: {
-        getIdentifyingCode: function (bRefresh) {
+        getIdentifyingCode: function(bRefresh) {
             this.getCode();
         },
         //获取验证码
@@ -114,7 +116,7 @@ export default {
                         sq: 8
                     }
                 })
-                .then((res) => {
+                .then(res => {
                     let rid = res.data.hd.rid;
                     if (rid >= 0) {
                         this.codeImg = `data:image/jpg;base64,${JSON.parse(res.data.bd).img}`;
@@ -123,7 +125,7 @@ export default {
                         this.open2(res.data.hd.rmsg);
                     }
                 })
-                .catch((error) => {
+                .catch(error => {
                     this.open2(error);
                 });
         },
@@ -134,26 +136,14 @@ export default {
                 this.show = false;
             }
         },
-        //回车防抖
-        debounce() {
-            if (this.enterBut) this.checkForm();
-            this.enterBut = false;
-            clearTimeout(this.timer);
-            this.timer = setTimeout(() => {
-                // if(this.enterBut)this.checkForm();
-                this.enterBut = true;
-            }, 1000);
-        },
         checkForm() {
             // let action = this.$store.state.Login.url + '/10001';
             // 加密处理
             var curTime = new Date().getTime();
             var hs_pwd = AESUTIL(this.param.username + '_' + this.param.password, this.param.username + '|' + curTime);
             let pwd1 = CryptoJS.enc.Utf8.parse(hs_pwd);
-            if (!this.param.username) {
-                this.open2('账号不能为空');
-            } else if (!this.param.password) {
-                this.open2('密码不能为空');
+            if (!this.param.username || !this.param.password) {
+                this.open2('账号、密码不能为空');
             } else if (this.param.verification.length == 0) {
                 this.open2('请输入验证码');
             } else {
@@ -179,14 +169,12 @@ export default {
                         },
                         bd: bd
                     })
-                    .then((res) => {
+                    .then(res => {
                         // console.log(res);
                         let rid = res.data.hd.rid;
                         if (rid >= 0) {
                             let loginData = JSON.parse(res.data.bd);
                             this.$store.commit('setLoginData', loginData);
-                            let key = cryptoJS.md5(this.param.username + '_' + this.param.password, 3);
-                            this.$store.commit('setKey', key);
                             var Days = 7;
                             var exp = new Date();
                             exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
@@ -199,7 +187,7 @@ export default {
                             this.getCode();
                         }
                     })
-                    .catch((error) => {
+                    .catch(error => {
                         console.log(error);
                     });
             }
@@ -226,7 +214,7 @@ export default {
                     },
                     bd: bd
                 })
-                .then((res) => {
+                .then(res => {
                     // console.log(res.data.bd);
                     let rid = res.data.hd.rid;
                     if (rid >= 0) {
@@ -236,7 +224,7 @@ export default {
                             this.open2('城市地址列表获取失败');
                         } else {
                             let restaurants = [];
-                            assetsList.map((item) => {
+                            assetsList.map(item => {
                                 restaurants.push({ value: item.mne, address: item.ne, id: item.id });
                             });
                             storage.AddressList = JSON.stringify(restaurants);
@@ -246,7 +234,7 @@ export default {
                         this.open2(res.data.hd.rmsg);
                     }
                 })
-                .catch((error) => {
+                .catch(error => {
                     this.open2(error);
                 });
 
@@ -288,8 +276,7 @@ export default {
             this.$message({
                 message: text,
                 type: 'error',
-                duration: 700,
-                offset: 30
+                duration: 900
             });
         }
     },
@@ -300,12 +287,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.el-input {
-    height: 40px;
-    /deep/.el-input__inner {
-        height: 40px;
-    }
-}
 .login-wrap {
     width: 100%;
     height: 100%;
@@ -317,17 +298,18 @@ export default {
     height: 88px;
     width: 100%;
     display: flex;
-    padding: 10px 100px;
+    padding: 22px 100px;
     align-items: center;
-    background-color: #020429;
+    background: #fff;
+    border-bottom: 1px solid #ccc;
 
     .title {
         width: 50%;
 
-        // img {
-        //     height: 60px;
-        //     width: 242px;
-        // }
+        img {
+            height: 60px;
+            width: 242px;
+        }
     }
 }
 
@@ -337,21 +319,12 @@ export default {
     background-repeat: no-repeat;
     background-size: cover;
 
-    background-image: url(../../assets/img/dbg1.jpg);
+    background-image: url(../../assets/img/dbg3.jpg);
     background-size: 100% 100%;
-    .left {
-        // img{
-        //     width: 750px;
-        //     height: 564px;
-        // }
-        position: absolute;
-        left: 15%;
-        top: 20%;
-    }
 }
 
 .footer {
-    height: 180px;
+    height: 240px;
     background: #fff;
     position: relative;
 }
@@ -367,14 +340,13 @@ export default {
 }
 .ms-login {
     position: absolute;
-    right: 15%;
+    right: 10%;
     top: 40%;
     width: 350px;
     margin: -190px 0 0 -175px;
     border-radius: 5px;
     /* background: rgba(255, 255, 255, 1); */
-    // background-color: hsla(0, 0%, 100%, 0.9);
-    background-color: #fff;
+    background-color: hsla(0, 0%, 100%, 0.9);
     overflow: hidden;
 }
 .ms-content {
@@ -382,16 +354,10 @@ export default {
 }
 .login-btn {
     text-align: center;
-    .el-button {
-        /deep/span {
-            font-size: 16px;
-            // line-height: 40px;
-        }
-    }
 }
 .login-btn button {
     width: 100%;
-    height: 40px;
+    height: 36px;
     margin-bottom: 10px;
 }
 .login-tips {
@@ -405,11 +371,11 @@ export default {
     right: 0;
     z-index: 5;
     width: 102px; /*设置图片显示的宽*/
-    height: 40px; /*图片显示的高*/
+    height: 35px; /*图片显示的高*/
     background: #e2e2e2;
     margin: 0;
     img {
-        height: 39px !important;
+        height: 35px !important;
     }
 }
 .text {

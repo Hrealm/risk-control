@@ -1,11 +1,15 @@
 <template>
     <div class="header">
         <!-- 折叠按钮 -->
-        <div class="collapse-btn" @click="collapseChage">
+        <!-- <div class="collapse-btn" @click="collapseChage">
             <i v-if="!collapse" class="el-icon-s-fold"></i>
             <i v-else class="el-icon-s-unfold"></i>
+        </div>-->
+        <div class="collapse-btn">
+            <img src="../../assets/img/footer-logo.png" alt />
         </div>
-        <div class="logo">运营商风控系统</div>
+        <div class="line"></div>
+        <div class="logo">交易中心风控系统</div>
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->
@@ -28,11 +32,12 @@
                     <span class="btn-bell-badge" v-if="message"></span>
                 </div>-->
                 <!-- 用户头像 -->
-                <div class="user-avator">
+                <!-- <div class="user-avator">
                     <img src="../../assets/img/img.jpg" />
-                </div>
+                </div>-->
+
                 <!-- 用户名下拉菜单 -->
-                <el-dropdown class="user-name" trigger="click" @command="handleCommand">
+                <!-- <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link">
                         {{username}}
                         <i class="el-icon-caret-bottom"></i>
@@ -40,7 +45,20 @@
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
-                </el-dropdown>
+                </el-dropdown>-->
+
+                <a href="javascript:;" class="goods" @click="exit" style="color:#fff;">
+                    <div class="deliverGoods">
+                        <i class="el-icon-switch-button"></i>
+                        退出
+                    </div>
+                </a>
+
+                <!-- 用户头像 -->
+                <div class="user-avator">
+                    <img :src="picUrl"  />
+                </div>
+                <div class="user-name">{{username}}</div>
             </div>
         </div>
     </div>
@@ -50,6 +68,7 @@ import bus from '../common/bus';
 export default {
     data() {
         return {
+			picUrl: require('../../assets/img/dispatch-icon.png'),
             collapse: false,
             fullscreen: false,
             username: 'admin',
@@ -69,21 +88,31 @@ export default {
         // 用户名下拉菜单选择事件
         handleCommand(command) {
             if (command == 'loginout') {
-                this.$confirm('是否退出登录','提示',{
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(()=>{
+                // localStorage.removeItem('vuex');
+                // var exp = new Date();
+                // exp.setTime(exp.getTime() - 1);
+                // document.cookie = `login=${
+                //     document.cookie.match(new RegExp('(^| )' + 'login' + '=([^;]*)(;|$)'))[2]
+                // };expires=${exp.toGMTString()}`;
+                // this.$router.push('/login');
+            }
+        },
+        exit() {
+            this.$confirm('是否退出登录', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            })
+                .then(() => {
                     localStorage.removeItem('vuex');
                     var exp = new Date();
                     exp.setTime(exp.getTime() - 1);
-                    document.cookie = `login=${document.cookie.match(new RegExp("(^| )"+'login'+"=([^;]*)(;|$)"))[2]};expires=${exp.toGMTString()}`;
+                    document.cookie = `login=${
+                        document.cookie.match(new RegExp('(^| )' + 'login' + '=([^;]*)(;|$)'))[2]
+                    };expires=${exp.toGMTString()}`;
                     this.$router.push('/login');
-                }).catch(()=>{
-                    
                 })
-                
-            }
+                .catch(() => {});
         },
         // 侧边栏折叠
         collapseChage() {
@@ -120,7 +149,7 @@ export default {
     },
     mounted() {
         if (document.body.clientWidth < 1500) {
-            this.collapseChage();
+            // this.collapseChage();
         }
     }
 };
@@ -132,7 +161,7 @@ export default {
     }
 }
 </style>
-<style scoped>
+<style scoped lang="scss">
 .header {
     position: relative;
     box-sizing: border-box;
@@ -147,19 +176,56 @@ export default {
     cursor: pointer;
     line-height: 70px;
 }
+.collapse-btn {
+    float: left;
+    padding: 0 30px;
+    cursor: pointer;
+    line-height: 70px;
+    // border-right: 1px solid #ccc;
+    // margin-right: 15px;
+    img {
+        margin-top: 13.5px;
+        width: 150px;
+        height: 40px;
+    }
+}
+.line {
+    position: absolute;
+    border-right: 5px solid #ffffff;
+    left: 210px;
+    top: 21.5px;
+    height: 40%;
+}
 .header .logo {
     float: left;
     width: 250px;
     line-height: 70px;
+    margin-left: 20px;
 }
 .header-right {
     float: right;
     padding-right: 50px;
+    .goods {
+        display: block;
+        padding: 5px;
+        box-sizing: border-box;
+        .deliverGoods:hover {
+            color: #409eff;
+        }
+    }
 }
 .header-user-con {
     display: flex;
     height: 70px;
     align-items: center;
+    .deliverGoods {
+        margin-right: 20px;
+        font-size: 16px;
+        position: relative;
+        a {
+            color: #fff;
+        }
+    }
 }
 .btn-fullscreen {
     transform: rotate(45deg);
@@ -190,10 +256,11 @@ export default {
 }
 .user-name {
     margin-left: 10px;
+    font-size: 16px;
 }
-.user-avator {
-    margin-left: 20px;
-}
+// .user-avator {
+//     // margin-left: 20px;
+// }
 .user-avator img {
     display: block;
     width: 40px;

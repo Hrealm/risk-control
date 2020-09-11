@@ -8,12 +8,16 @@ Router.prototype.push = function push(location) {
 Vue.use(Router);
 
 export default new Router({
-    mode: 'hash',
     routes: [
         {
             path: '/',
             redirect: '/login'
         },
+		{
+			path: '/DigitalHall',
+			component: () => import('../components/page/DigitalHall.vue'),
+			meta: { title: '数据大厅' }
+		},
         {
             path: '/',
             component: () => import('../components/common/Home.vue'),
