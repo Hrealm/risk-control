@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@jiaminghi/data-view": "^2.9.6",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "babel-polyfill": "^6.26.0",
     "crypto-js": "^4.0.0",
     "echarts": "^4.8.0",
